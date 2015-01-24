@@ -2,3 +2,6 @@
 *.csv
 
 *.gz
+delays_????
+*.npy
+

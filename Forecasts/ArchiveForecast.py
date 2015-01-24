@@ -18,7 +18,7 @@ def getforecast(station):
     f = urllib2.urlopen(url)
     json_forecast = f.read()
     print airport_id
-    time.sleep(6.5)
+    time.sleep(61/100)
     return json_forecast
 con = mdb.connect('localhost', 'root', '', 'weather') #host, user, password, #database
 

@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from random import sample
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import ExtraTreesClassifier
 from sklearn import svm
 from sklearn import cross_validation
 
@@ -31,15 +31,25 @@ for year in years:
     delays=delays.append(pd.read_pickle('Data/delays_'+str(year)))
 
 jfk_airport_id=12478
-delays=delays[delays.OriginAirportID == jfk_airport_id]
-print delays
-delays=delays[(delays['Cancelled']==0)&(delays['Diverted']==0)]
-print delays
-print delays.dtypes
+# AA_airline_id=19805
 
-featurelabels=['AirlineID', 'Month', 'DayOfWeek', 'DayOfMonth', 'DayNum', 'DepMidnightMinutes', 'DaysToHoliday', 'Distance', 'DestAirportID']
+delays=delays[delays.OriginAirportID == jfk_airport_id]
+# delays=delays[delays.AirlineID == AA_airline_id]
+
+delays=delays[(delays['Cancelled']==0)&(delays['Diverted']==0)]
+
+
+delays['DaysToHoliday']=delays['DaysToHoliday'].apply(lambda x: x if np.abs(x)<4 else 1000)
+delays['DepMidnightMinutes']=delays['DepMidnightMinutes'].apply(lambda x: x - x % 60)
+print delays
+
+featurelabels=['AirlineID','Month', 'DayOfWeek', 'DayOfMonth', 'DayNum', 'DepMidnightMinutes', 'DaysToHoliday']
+
+
 X=delays.loc[:,featurelabels].values
 y=delays['DepDelayed'].values
+
+print X
 
 cv = cross_validation.StratifiedKFold(y, n_folds=10)
 
@@ -50,7 +60,7 @@ all_tpr = []
 for i, (train, test) in enumerate(cv):
 
     print 'Training ...'
-    classifier = RandomForestClassifier(n_estimators=500, n_jobs=-1)
+    classifier = ExtraTreesClassifier(n_estimators=250, n_jobs=-1)
     
     classifier = classifier.fit( X[train], y[train])
     probas_ = classifier.predict_proba(X[test])
@@ -59,7 +69,7 @@ for i, (train, test) in enumerate(cv):
     mean_tpr += interp(mean_fpr, fpr, tpr)
     mean_tpr[0] = 0.0
     roc_auc = auc(fpr, tpr)
-    plt.plot(fpr, tpr, lw=1, label='ROC fold %d (area = %0.2f)' % (i, roc_auc))
+    # plt.plot(fpr, tpr, lw=1, label='ROC fold %d (area = %0.2f)' % (i, roc_auc))
     # print f1_score(y[test], classifier.predict(X[test]), average='weighted')
 
 
@@ -89,5 +99,5 @@ plt.ylim([-0.05, 1.05])
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('Receiver operating characteristic example')
-plt.legend(loc="lower right")
+# plt.legend(loc="lower right")
 plt.savefig('roc.pdf',dpi=300)
