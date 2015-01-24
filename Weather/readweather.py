@@ -62,17 +62,14 @@ weather=TMAX
 weather=pd.merge(weather, TMIN, on=['STATION','DATE'], how='outer')
 weather=pd.merge(weather, PRCP, on=['STATION','DATE'], how='outer')
 weather=pd.merge(weather, SNOW, on=['STATION','DATE'], how='outer')
-# weather=pd.merge(weather, SNWD, on=['STATION','DATE'], how='outer')
 weather=pd.merge(weather, AWND, on=['STATION','DATE'], how='outer')
 weather=pd.merge(weather, WSF2, on=['STATION','DATE'], how='outer')
-# weather=pd.merge(weather, WSF5, on=['STATION','DATE'], how='outer')
 weather=pd.merge(weather, WDF2, on=['STATION','DATE'], how='outer')
-# weather=pd.merge(weather, WDFS, on=['STATION','DATE'], how='outer')
 
 weather = weather[np.isfinite(weather['TMAX'])&np.isfinite(weather['TMIN'])&np.isfinite(weather['PRCP'])&np.isfinite(weather['SNOW'])&
                   np.isfinite(weather['AWND'])&np.isfinite(weather['WSF2'])&np.isfinite(weather['WDF2'])]
             
 
 weather=pd.merge(weather, stations, on='STATION')
-weather.to_pickle('Data/weather_'+str(year))
-# weather.to_csv('A.csv')
+# weather.to_pickle('Data/weather_'+str(year))
+weather.to_csv('A.csv')

@@ -27,7 +27,7 @@ def distancetoholiday(flight):
     # return 1
     
 def readdelays(month, year):
-    delays=pd.read_csv('Data/CSVs/On_Time_On_Time_Performance_'+str(year)+'_'+str(month)+'.csv',
+    delays=pd.read_csv('../Data/CSVs/On_Time_On_Time_Performance_'+str(year)+'_'+str(month)+'.csv',
                         usecols=['FlightDate','AirlineID','FlightNum','OriginAirportID','OriginState', 'DestAirportID', 'DestState', 'CRSDepTime','DepTime','DepDelay', 
                                  'CRSArrTime', 'ArrTime','ArrDelay','CarrierDelay','WeatherDelay','NASDelay','SecurityDelay','LateAircraftDelay',
                                  'Cancelled','Diverted','CRSElapsedTime','ActualElapsedTime','Distance','Month', 'DayofMonth', 'DayOfWeek']
@@ -122,4 +122,4 @@ for year in years:
 
 
     
-    delays.to_pickle('Data/delays_'+str(year))
+    delays.to_pickle('../Data/delays_'+str(year))
