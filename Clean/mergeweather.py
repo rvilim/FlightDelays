@@ -3,9 +3,13 @@ import numpy as np
 import sys
 from datetime import datetime
 
-year=sys.argv[1]
+years=sys.argv[1]
 
 weather=pd.DataFrame()
-weather=pd.read_pickle('../Weather/Data/weather_'+str(year))
+delays=pd.DataFrame()
 
-print weather
+for year in years:
+    weather=weather.append(pd.read_pickle('../Weather/Data/weather_'+str(year)), ignore_index=True)
+    delays=delays.append(pd.read_pickle('../Data/delays_'+str(year)), ignore_index=True)
+
+print weather.dtypes
