@@ -33,11 +33,16 @@ def readdelays(month, year):
                                  'Cancelled','Diverted','CRSElapsedTime','ActualElapsedTime','Distance','Month', 'DayofMonth', 'DayOfWeek']
                       )    
 
-    # use for debuggine, stops the whole file from getting analysed which can be quite time consuming
-    delays=delays[:100]
-
     return delays
 
+def fillcancelled(row):
+    if(row['Cancelled']=='1'):
+        row['ArrTime']='-9999'
+        row['ArrDelay']='-9999'
+        row['ActualElapsedTime']='-9999'
+    
+    return row
+    
 def cleandelays(delays,year):
         
     delays=delays[delays['DepTime']!=2400]
@@ -51,9 +56,12 @@ def cleandelays(delays,year):
     delays['NASDelay']=delays['NASDelay'].fillna(0)
     delays['SecurityDelay']=delays['SecurityDelay'].fillna(0)
     delays['LateAircraftDelay']=delays['LateAircraftDelay'].fillna(0)    
+    delays['Cancelled']=delays['Cancelled'].fillna(0)
         
+    delays=delays.apply(fillcancelled,axis=1)
+    
     delays=delays.dropna()
-
+    
     delays.loc[:,['AirlineID']]=delays.loc[:,['AirlineID']].astype('uint32')
     delays.loc[:,['FlightNum']]=delays.loc[:,['FlightNum']].astype('uint16')
     delays.loc[:,['OriginAirportID']]=delays.loc[:,['OriginAirportID']].astype('uint32')
@@ -69,7 +77,6 @@ def cleandelays(delays,year):
     delays.loc[:,['SecurityDelay']]=delays.loc[:,['SecurityDelay']].astype('int16')
     delays.loc[:,['LateAircraftDelay']]=delays.loc[:,['LateAircraftDelay']].astype('int16')
     delays.loc[:,['Cancelled']]=delays.loc[:,['Cancelled']].astype('uint8')
-    delays.loc[:,['Diverted']]=delays.loc[:,['Diverted']].astype('uint8')
     delays.loc[:,['CRSElapsedTime']]=delays.loc[:,['CRSElapsedTime']].astype('uint32')
     delays.loc[:,['ActualElapsedTime']]=delays.loc[:,['ActualElapsedTime']].astype('uint32')
     delays.loc[:,['Distance']]=delays.loc[:,['Distance']].astype('uint32')
@@ -96,14 +103,9 @@ def cleandelays(delays,year):
     delays=delays.drop('DestState', axis=1)
     delays=delays.drop('FlightDate', axis=1)    
     delays=delays.drop('CRSDepTime', axis=1)
-
-    print delays
     
     return delays
 
-jfk_airport_id=12478
-
-# years=[ 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014]
 years=sys.argv[1:]
 
 delays=pd.DataFrame()
