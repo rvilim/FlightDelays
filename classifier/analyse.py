@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from random import sample
 
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.feature_extraction import DictVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import OneHotEncoder
 
 from sklearn import svm
 from sklearn import cross_validation
@@ -36,9 +36,10 @@ def chunk_arrivals(row):
         return 0
     return 1
 
-def append_vectorized(row, enc):
-    row.append(enc.transform([[19977]]).toarray())
-    
+def get_vectorized(AirlineID, enc):
+    AirlineID=[[i] for i in delays['AirlineID'].values]
+    return enc.transform(AirlineID).toarray()
+
 def balance_weights(y):
     """Compute sample weights such that the class distribution of y becomes
        balanced.
@@ -54,10 +55,8 @@ def balance_weights(y):
     y = np.asarray(y)
     y = np.searchsorted(np.unique(y), y)
     bins = np.bincount(y)
-
     weights = 1. / bins.take(y)
     weights *= bins.min()
-
     return weights
         
 years=sys.argv[1:]
@@ -79,26 +78,38 @@ delays=delays[delays.OriginAirportID == jfk_airport_id]
 delays=delays[delays.DestAirportID == ord_airport_id]
 # delays=delays[delays.AirlineID == AA_airline_id]
 
-airlines=list(np.unique(delays['AirlineID'].apply(lambda x: [int(x)])))
-enc = OneHotEncoder()
-enc.fit(airlines)
-
 delays=delays[(delays['Diverted']==0)]
 
 delays['ArrDelayGroup']=delays.apply(chunk_arrivals, axis=1)
 
+# Get the encoder for the airline
+airlines=list(np.unique(delays['AirlineID'].apply(lambda x: [int(x)])))
+enc = OneHotEncoder()
+enc.fit(airlines)
 
-featurelabels=['AirlineID','Month', 'DayOfWeek', 'DayOfMonth', 'DayNum', 'DepMidnightMinutes', 'DaysToHoliday',
-               'TMax_Dest','TMin_Dest','Prcp_Dest','Snow_Dest','AWnd_Dest','WSf2_Dest','WDf2_Dest',
-               'TMax_Dest_prev','TMin_Dest_prev','Prcp_Dest_prev','Snow_Dest_prev','AWnd_Dest_prev','WSf2_Dest_prev','WDf2_Dest_prev',
-               'TMax_Origin','TMin_Origin','Prcp_Origin','Snow_Origin','AWnd_Origin','WSf2_Origin','WDf2_Origin',
-               'TMax_Origin_prev','TMin_Origin_prev','Prcp_Origin_prev','Snow_Origin_prev','AWnd_Origin_prev','WSf2_Origin_prev','WDf2_Origin_prev'
+vec_airlines=get_vectorized(delays['AirlineID'].values,enc)
+
+featurelabels=['Month', 'DayOfWeek', 'DayOfMonth', 'DayNum', 'DepMidnightHours', 'ArrMidnightHours', 'DaysToHoliday',
+               'Prcp_Dest','Snow_Dest','AWnd_Dest','WSf2_Dest','WDf2_Dest',
+               'Prcp_Dest_prev','Snow_Dest_prev','AWnd_Dest_prev','WSf2_Dest_prev','WDf2_Dest_prev',
+               'Prcp_Origin','Snow_Origin','AWnd_Origin','WSf2_Origin','WDf2_Origin',
+               'Prcp_Origin_prev','Snow_Origin_prev','AWnd_Origin_prev','WSf2_Origin_prev','WDf2_Origin_prev'
               ]
 
-X=delays.loc[:,featurelabels].values
 
-# X.to_csv('A.csv')
+# delays.loc[:,featurelabels].to_csv('A.csv')
+
+# sys.exit()
+# featurelabels.append(['Airlineid'+str(i) for i in range(0,len(vec_airlines[0]))])
+X=delays.loc[:,featurelabels].values
+X=np.hstack((X,vec_airlines))
+
+for i in range(0,len(vec_airlines[0])):
+    featurelabels.append('Airlineid'+str(i))
+    
+    
 y=delays['ArrDelayGroup'].values
+
 # y.to_csv('B.csv')
 # sys.exit()
 
@@ -111,11 +122,11 @@ all_tpr = []
 for i, (train, test) in enumerate(cv):
 
     print 'Training ...'
-    classifier = GradientBoostingClassifier(n_estimators=100)
+    classifier = RandomForestClassifier(n_estimators=100)
 
     weights=balance_weights(y[train])
 
-    classifier = classifier.fit( X[train], y[train])#, sample_weight=weights)
+    classifier = classifier.fit( X[train], y[train], sample_weight=weights)
     probas_ = classifier.predict_proba(X[test])
     
     fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])
@@ -126,17 +137,17 @@ for i, (train, test) in enumerate(cv):
     print f1_score(y[test], classifier.predict(X[test]), average='weighted')
 
 
-# importances = classifier.feature_importances_
-# std = np.std([tree.feature_importances_ for tree in classifier.estimators_],
-             # axis=0)
-# indices = np.argsort(importances)[::-1]
+importances = classifier.feature_importances_
+std = np.std([tree.feature_importances_ for tree in classifier.estimators_],
+             axis=0)
+indices = np.argsort(importances)[::-1]
 
 # Print the feature ranking
-# print("Feature ranking:")
-# numfeatures=np.shape(indices)[0]
-#
-# for f in range(numfeatures):
-#     print("%d. feature %d (%f pm %f) - %s" % (f + 1, indices[f], importances[indices[f]], std[indices[f]], featurelabels[f]))
+print("Feature ranking:")
+numfeatures=np.shape(indices)[0]
+
+for f in range(numfeatures):
+    print("%d. feature %d (%f pm %f) - %s" % (f + 1, indices[f], importances[indices[f]], std[indices[f]], featurelabels[f]))
 
 # ROC Curve
 plt.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6), label='Luck')

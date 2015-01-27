@@ -69,7 +69,6 @@ def cleandelays(delays,year):
     delays.loc[:,['CRSDepTime']]=delays.loc[:,['CRSDepTime']].astype('uint16')
     delays.loc[:,['DepDelay']]=delays.loc[:,['DepDelay']].astype('int16')
     delays.loc[:,['CRSArrTime']]=delays.loc[:,['CRSArrTime']].astype('uint16')
-    delays.loc[:,['ArrTime']]=delays.loc[:,['ArrTime']].astype('uint16')
     delays.loc[:,['ArrDelay']]=delays.loc[:,['ArrDelay']].astype('int16')
     delays.loc[:,['CarrierDelay']]=delays.loc[:,['CarrierDelay']].astype('int16')
     delays.loc[:,['WeatherDelay']]=delays.loc[:,['WeatherDelay']].astype('int16')
@@ -84,18 +83,20 @@ def cleandelays(delays,year):
     delays=delays.drop('DayofMonth', axis=1) # Note the change in Capitalization, I basically just renamed the column here
     delays.loc[:,['Month']]=delays.loc[:,['Month']].astype('uint8')
     delays.loc[:,['DayOfWeek']]=delays.loc[:,['DayOfWeek']].astype('uint8')-1
-    
-    # Create a new column, if the departure is more than 15 minutes late, we will call it "delayed"
-    delays['DepDelayed']=delays['DepDelay'].apply(lambda x: 1 if x>15 else 0)
-    
+        
     # Turn the CRS Departure time into a Datetime
     delays['CRSDepTime']=delays['CRSDepTime'].astype('int').astype('str').str.pad(4,'left').str.replace(' ','0')
     delays['CRSDepTime']=delays['CRSDepTime'].str[0:2]+':'+delays['CRSDepTime'].str[2:4]
+    delays['CRSArrTime']=delays['CRSArrTime'].astype('int').astype('str').str.pad(4,'left').str.replace(' ','0')
+    delays['CRSArrTime']=delays['CRSArrTime'].str[0:2]+':'+delays['CRSArrTime'].str[2:4]
+
 
     delays['CRSDep']=pd.to_datetime(delays.FlightDate+' '+delays.CRSDepTime ,'%Y-%m-%d %H:%M')
+    delays['CRSArr']=pd.to_datetime(delays.FlightDate+' '+delays.CRSArrTime ,'%Y-%m-%d %H:%M')
 
     delays['DayNum']=delays['CRSDep'].apply(lambda d: datetime.strftime(d, '%j')).astype('uint16')
-    delays['DepMidnightMinutes']=delays['CRSDep'].apply(lambda d: int(datetime.strftime(d, '%H'))*60+int(datetime.strftime(d, '%M'))).astype('uint16')
+    delays['DepMidnightHours']=delays['CRSDep'].apply(lambda d: int(datetime.strftime(d, '%H'))).astype('uint16')
+    delays['ArrMidnightHours']=delays['CRSArr'].apply(lambda d: int(datetime.strftime(d, '%H'))).astype('uint16')
 
     delays['DaysToHoliday']=delays.apply(lambda x: distancetoholiday(x),axis=1)
 
@@ -103,6 +104,8 @@ def cleandelays(delays,year):
     delays=delays.drop('DestState', axis=1)
     delays=delays.drop('FlightDate', axis=1)    
     delays=delays.drop('CRSDepTime', axis=1)
+    delays=delays.drop('CRSArrTime', axis=1)
+
     
     return delays
 
