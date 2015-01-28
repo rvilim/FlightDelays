@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from random import sample
 
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+# from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import OneHotEncoder
 
 from sklearn import svm
@@ -36,9 +37,9 @@ def chunk_arrivals(row):
         return 0
     return 1
 
-def get_vectorized(catarray, enc):
-    catarray=[[i] for i in catarray]
-    return enc.transform(catarray).toarray()
+def get_vectorized(AirlineID, enc):
+    AirlineID=[[i] for i in delays['AirlineID'].values]
+    return enc.transform(AirlineID).toarray()
 
 def balance_weights(y):
     """Compute sample weights such that the class distribution of y becomes
@@ -84,81 +85,33 @@ delays['ArrDelayGroup']=delays.apply(chunk_arrivals, axis=1)
 
 # Get the encoder for the airline
 airlines=list(np.unique(delays['AirlineID'].apply(lambda x: [int(x)])))
-# dephours=list(np.unique(delays['DepMidnightHours'].apply(lambda x: [int(x)])))
-# arrhours=list(np.unique(delays['ArrMidnightHours'].apply(lambda x: [int(x)])))
-dayofweek=list(np.unique(delays['DayOfWeek'].apply(lambda x: [int(x)])))
-dayofmonth=list(np.unique(delays['DayOfMonth'].apply(lambda x: [int(x)])))
-month=list(np.unique(delays['Month'].apply(lambda x: [int(x)])))
+dephours=list(np.unique(delays['dephours'].apply(lambda x: [int(x)])))
+arrhours=list(np.unique(delays['arrhours'].apply(lambda x: [int(x)])))
 
-Airlinesenc = OneHotEncoder()
-DayOfWeekenc = OneHotEncoder()
-MonthEnc = OneHotEncoder()
-DayOfMonthEnc = OneHotEncoder()
+enc = OneHotEncoder()
+enc.fit(airlines)
 
-# dephoursenc = OneHotEncoder()
-# arrhoursenc = OneHotEncoder()
+vec_airlines=get_vectorized(delays['AirlineID'].values,enc)
 
-Airlinesenc.fit(airlines)
-DayOfWeekenc.fit(dayofweek)
-MonthEnc.fit(month)
-DayOfMonthEnc.fit(dayofmonth)
-
-# dephoursenc.fit(dephours)
-# arrhoursenc.fit(arrhours)
-
-vec_Airlines=get_vectorized(delays['AirlineID'].values,Airlinesenc)
-vec_DayOfWeek=get_vectorized(delays['DayOfWeek'].values,DayOfWeekenc)
-vec_Month=get_vectorized(delays['Month'].values,MonthEnc)
-vec_DayOfMonth=get_vectorized(delays['DayOfMonth'].values,DayOfMonthEnc)
-
-# vec_dephours=get_vectorized(delays['DepMidnightHours'].values,dephoursenc)
-# vec_arrhours=get_vectorized(delays['ArrMidnightHours'].values,arrhoursenc)
-# 'Month', 'DayOfWeek', 'DayOfMonth', 'DayNum', 
-
-featurelabels=['DepMidnightHours', 'ArrMidnightHours', 'DaysToHoliday',
+featurelabels=['Month', 'DayOfWeek', 'DayOfMonth', 'DayNum', 'DepMidnightHours', 'ArrMidnightHours', 'DaysToHoliday',
                'Prcp_Dest','Snow_Dest','AWnd_Dest','WSf2_Dest','WDf2_Dest',
                'Prcp_Dest_prev','Snow_Dest_prev','AWnd_Dest_prev','WSf2_Dest_prev','WDf2_Dest_prev',
                'Prcp_Origin','Snow_Origin','AWnd_Origin','WSf2_Origin','WDf2_Origin',
                'Prcp_Origin_prev','Snow_Origin_prev','AWnd_Origin_prev','WSf2_Origin_prev','WDf2_Origin_prev'
               ]
 
-delays.to_csv('A.csv')
+
 # delays.loc[:,featurelabels].to_csv('A.csv')
 
 # sys.exit()
 # featurelabels.append(['Airlineid'+str(i) for i in range(0,len(vec_airlines[0]))])
 X=delays.loc[:,featurelabels].values
-X=np.hstack((X,vec_Airlines))
-X=np.hstack((X,vec_DayOfWeek))
-X=np.hstack((X,vec_Month))
-X=np.hstack((X,vec_DayOfMonth))
+X=np.hstack((X,vec_airlines))
 
-# X=np.hstack((X,vec_dephours))
-# X=np.hstack((X,vec_arrhours))
-
-for i in range(0,len(vec_Airlines[0])):
+for i in range(0,len(vec_airlines[0])):
     featurelabels.append('Airlineid'+str(i))
-
-for i in range(0,len(vec_DayOfWeek[0])):
-    featurelabels.append('DayOfWeek'+str(i))
     
-for i in range(0,len(vec_Month[0])):
-    featurelabels.append('Month'+str(i))
     
-for i in range(0,len(vec_DayOfMonth[0])):
-    featurelabels.append('DayOfMonth'+str(i))
-# for i in range(0,len(vec_dephours[0])):
-#     featurelabels.append('DepHour'+str(i))
-#
-# for i in range(0,len(vec_arrhours[0])):
-#     featurelabels.append('ArrHour'+str(i))
-# 
-print featurelabels
-# np.savetxt("A.csv", X, delimiter=",")
-# delays.loc[:,featurelabels].to_csv('A.csv')
-
-# sys.exit()
-
 y=delays['ArrDelayGroup'].values
 
 # y.to_csv('B.csv')
@@ -173,7 +126,7 @@ all_tpr = []
 for i, (train, test) in enumerate(cv):
 
     print 'Training ...'
-    classifier = GradientBoostingClassifier(n_estimators=100, max_features=63, min_samples_split=57, max_depth=4, min_samples_leaf=14)
+    classifier = RandomForestClassifier(n_estimators=500)
 
     weights=balance_weights(y[train])
 
@@ -188,17 +141,17 @@ for i, (train, test) in enumerate(cv):
     print f1_score(y[test], classifier.predict(X[test]), average='weighted')
 
 
-# importances = classifier.feature_importances_
-# std = np.std([tree.feature_importances_ for tree in classifier.estimators_],
-             # axis=0)
-# indices = np.argsort(importances)[::-1]
+importances = classifier.feature_importances_
+std = np.std([tree.feature_importances_ for tree in classifier.estimators_],
+             axis=0)
+indices = np.argsort(importances)[::-1]
 
 # Print the feature ranking
-# print("Feature ranking:")
-# numfeatures=np.shape(indices)[0]
+print("Feature ranking:")
+numfeatures=np.shape(indices)[0]
 
-# for f in range(numfeatures):
-    # print("%d. feature %d (%f pm %f) - %s" % (f + 1, indices[f], importances[indices[f]], std[indices[f]], featurelabels[f]))
+for f in range(numfeatures):
+    print("%d. feature %d (%f pm %f) - %s" % (f + 1, indices[f], importances[indices[f]], std[indices[f]], featurelabels[f]))
 
 # ROC Curve
 plt.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6), label='Luck')

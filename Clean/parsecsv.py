@@ -14,9 +14,9 @@ import holidays
 def distancetoholiday(flight):
 
     
-    shiftingholidays=holidays.getholidays(flight['CRSDep'].year,flight['OriginState'])
+    daysoff=holidays.getholidays(flight['CRSDep'].year,flight['OriginState'])
     # This does a list comprehension to get the distance from each holiday
-    holidaydeltas=[(flight['CRSDep'].date()-holiday).days for holiday in shiftingholidays]
+    holidaydeltas=[(flight['CRSDep'].date()-holiday).days for holiday in daysoff]
 
     # This then converts that to a numpy array
     # then takes the absolute value of all the variables in that numpy array, then gets the location of the closest
@@ -30,8 +30,7 @@ def readdelays(month, year):
     delays=pd.read_csv('../Data/CSVs/On_Time_On_Time_Performance_'+str(year)+'_'+str(month)+'.csv',
                         usecols=['FlightDate','AirlineID','FlightNum','OriginAirportID','OriginState', 'DestAirportID', 'DestState', 'CRSDepTime','DepTime','DepDelay', 
                                  'CRSArrTime', 'ArrTime','ArrDelay','CarrierDelay','WeatherDelay','NASDelay','SecurityDelay','LateAircraftDelay',
-                                 'Cancelled','Diverted','CRSElapsedTime','ActualElapsedTime','Distance','Month', 'DayofMonth', 'DayOfWeek']
-                      )    
+                                 'Cancelled','Diverted','CRSElapsedTime','ActualElapsedTime','Distance','Month', 'DayofMonth', 'DayOfWeek'])    
 
     return delays
 
@@ -126,5 +125,5 @@ for year in years:
         delays=delays.append(delaymonth, ignore_index=True)
 
 
-    
+    # delays.to_csv('A.csv')
     delays.to_pickle('../Data/delays_'+str(year))

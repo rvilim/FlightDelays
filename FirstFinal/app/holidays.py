@@ -61,7 +61,7 @@ def statelookup(abbrev):
         
         
 def getholidays(year, stateabbrev):
-    holidaylist=["Independence Day", "Thanksgiving Day", "Labor Day", "New year", "Christmas Day", "Memorial Day" ]
+    holidaylist=["Independence Day", "Thanksgiving Day", "Labor Day" ]
     
     state=statelookup(stateabbrev)
 
