@@ -157,4 +157,4 @@ y=delays['ArrDelayGroup'].values
 classifier = GradientBoostingClassifier(n_estimators=100, max_features=63, min_samples_split=57, max_depth=4, min_samples_leaf=14)
 classifier = classifier.fit( X, y)
 
-joblib.dump(clf, "classifiers/"+origin_airport_id+'->'+dest_airport_id) 
+joblib.dump(classifier, "classifiers/"+str(origin_airport_id)+'->'+str(dest_airport_id)) 
