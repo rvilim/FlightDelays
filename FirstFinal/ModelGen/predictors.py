@@ -27,9 +27,13 @@ from scipy import interp
 from sklearn.externals import joblib
 
 def chunk_arrivals(row):
-    if(row<=15):
+    if(row['Cancelled']==1):
+        return -1
+        
+    if(row['ArrDelay']<=15):
         return 0
-    return int(np.ceil(row/15.0))-1
+        
+    return int(np.ceil(row['ArrDelay']/15.0))-1
 
 def get_vectorized(catarray, enc):
     catarray=[[i] for i in catarray]
@@ -151,15 +155,7 @@ with open(infile, 'rb') as csvfile:
     for row in routereader:
         origin_airport_id=int(row[0])
         dest_airport_id=int(row[1])
-        print 'Predicting '+row[0]+ u' \u2708 \u2708 \u2708 '+ row[1]+ '...'
-                
-
-        
-
-# origin_airport_id=int(sys.argv[1])
-# dest_airport_id=int(sys.argv[2])
-# years=sys.argv[3:]
-#
-
+        print 'Predicting '+row[0]+ ' ---> '+ row[1]+ ' ...'
+        genmodel(fulldelays, origin_airport_id, dest_airport_id)
 
 
