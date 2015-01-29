@@ -105,6 +105,11 @@ DayOfWeekenc.fit(dayofweek)
 MonthEnc.fit(month)
 DayOfMonthEnc.fit(dayofmonth)
 
+joblib.dump(Airlinesenc, "vectorizers/Airlinesenc_"+str(origin_airport_id)+'->'+str(dest_airport_id)) 
+joblib.dump(DayOfWeekenc, "vectorizers/DayOfWeekenc_"+str(origin_airport_id)+'->'+str(dest_airport_id)) 
+joblib.dump(MonthEnc, "vectorizers/MonthEnc_"+str(origin_airport_id)+'->'+str(dest_airport_id)) 
+joblib.dump(DayOfMonthEnc, "vectorizers/DayOfMonthEnc_"+str(origin_airport_id)+'->'+str(dest_airport_id)) 
+
 # dephoursenc.fit(dephours)
 # arrhoursenc.fit(arrhours)
 

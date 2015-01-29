@@ -38,13 +38,19 @@
             if(x < max_fields){ //max input box allowed
                 x++; //text box increment
                 $(wrapper).append("<div class='row'>"
-              + " <div a class='col-md-3'>"
+              + " <div a class='col-md-2'>"
               + "   <div class='input-group date' id='datetimepicker"+x+"'>"
-              + "     <input type='text' name='flightdatetime"+x+"' class='form-control' />"
+              + "     <input type='text' name='flightdeptime"+x+"' class='form-control' />"
               + "     <span class='input-group-addon'><span class='glyphicon glyphicon-calendar'></span></span>"
               + "   </div>"
               + " </div>"
-              + " <div class='col-md-3'>"
+              + " <div a class='col-md-2'>"
+              + "   <div class='input-group date' id='datetimepicker"+x+x+"'>"
+              + "     <input type='text' name='flightarrtime"+x+"' class='form-control' />"
+              + "     <span class='input-group-addon'><span class='glyphicon glyphicon-calendar'></span></span>"
+              + "   </div>"
+              + " </div>"
+              + " <div class='col-md-2'>"
               + "   <select name='airline"+x+"' class='form-control'>"
               + "       <option value='19805'>American Airlines</option>"
               + "   </select>"
@@ -69,7 +75,10 @@
               script.type  = "text/javascript";
               script.text  = "$(function () {"
                              + "$('#datetimepicker"+x+"').datetimepicker();"
-                             + "});"               // use this for inline script
+                             + "});"
+                             + "$(function () {"
+                             + "$('#datetimepicker"+x+x+"').datetimepicker();"
+                             + "});"
               document.body.appendChild(script);
             }
         });
@@ -118,24 +127,32 @@
     <div class = "container">
 
       <form  action="/output" method="GET">
+        <button class="add_field_button">Add More Fields</button>
         <div class="form-group">
           <div class="row">
-            <div class="col-md-3">Flight Date and Time</div>
-            <div class="col-md-3">Airline</div>
+            <div class="col-md-2">Departing At</div>
+            <div class="col-md-2">Arriving At</div>
+            <div class="col-md-2">Airline</div>
             <div class="col-md-2">Origin</div>
             <div class="col-md-2">Destination</div>
             <div class="col-md-2"> <a href='#' class='remove_field'></a></div>
           </div>
           <div class="input_fields_wrap">
-            <button class="add_field_button">Add More Fields</button>
+            
             <div class="row">
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <div class="input-group date" id="datetimepicker0">
-                  <input type="text" name="flightdatetime1" class="form-control" />
+                  <input type="text" name="flightdeptime1" class="form-control" />
                   <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
                 </div>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-2">
+                <div class="input-group date" id="datetimepicker00">
+                  <input type="text" name="flightarrtime1" class="form-control" />
+                  <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                </div>
+              </div>
+              <div class="col-md-2">
                 <select name="airline1" class="form-control">
                     <option value="19805">American Airlines</option>
                 </select>
@@ -155,6 +172,11 @@
               <script type="text/javascript">
                   $(function () {
                       $('#datetimepicker0').datetimepicker();
+                  });
+              </script>
+              <script type="text/javascript">
+                  $(function () {
+                      $('#datetimepicker00').datetimepicker();
                   });
               </script>
             </div>
