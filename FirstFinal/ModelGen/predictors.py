@@ -58,8 +58,8 @@ def balance_weights(y):
     weights *= bins.min()
     return weights
 
-def genmodel(delays, origin_airport_id, dest_airport_id):
-    delays=fulldelays[delays.OriginAirportID == origin_airport_id]
+def genmodel(fulldelays, origin_airport_id, dest_airport_id):
+    delays=fulldelays[fulldelays.OriginAirportID == origin_airport_id]
     delays=delays[delays.DestAirportID == dest_airport_id]
     
     delays=delays[(delays['Diverted']==0)]
@@ -128,6 +128,11 @@ def genmodel(delays, origin_airport_id, dest_airport_id):
 
     classifier = GradientBoostingClassifier(n_estimators=100, max_features=63, min_samples_split=57, max_depth=4, min_samples_leaf=14)
     classifier = classifier.fit( X, y)
+
+    joblib.dump(Airlinesenc, "vectorizers/Airlinesenc_"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3) 
+    joblib.dump(DayOfWeekenc, "vectorizers/DayOfWeekenc_"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3) 
+    joblib.dump(MonthEnc, "vectorizers/MonthEnc_"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3) 
+    joblib.dump(DayOfMonthEnc, "vectorizers/DayOfMonthEnc_"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3) 
 
     joblib.dump(classifier, "classifiers/"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3)
 

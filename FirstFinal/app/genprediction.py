@@ -1,8 +1,10 @@
 from sklearn.externals import joblib
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 import holidays
 import os
+from getweather import getforecast
+from sklearn.preprocessing import OneHotEncoder
 
 def get_vectorized(catarray, enc):
     catarray=[[i] for i in catarray]
@@ -22,16 +24,16 @@ def distancetoholiday(DepTime):
 def predict(flight):
     Origin_Airport_ID=flight["Origin_Airport_ID"]
     Dest_Airport_ID=flight["Dest_Airport_ID"]
-    AirlineID=flight["AirlineID"]
+    Airline_ID=flight["AirlineID"]
     DepTime=flight["DepTime"]
     ArrTime=flight["ArrTime"]
     
-    forest=joblib.load('app/predicts/'+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
+    classifier=joblib.load('app/classifiers/'+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
 
-    Airlinesenc = joblib.load("vectorizers/Airlinesenc_"+str(origin_airport_id)+'->'+str(dest_airport_id)) 
-    DayOfWeekenc = joblib.load("vectorizers/DayOfWeekenc_"+str(origin_airport_id)+'->'+str(dest_airport_id)) 
-    MonthEnc = joblib.load("vectorizers/MonthEnc_"+str(origin_airport_id)+'->'+str(dest_airport_id)) 
-    DayOfMonthEnc = joblib.load("vectorizers/DayOfMonthEnc_"+str(origin_airport_id)+'->'+str(dest_airport_id)) 
+    Airlinesenc = joblib.load("app/vectorizers/Airlinesenc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID)) 
+    DayOfWeekenc = joblib.load("app/vectorizers/DayOfWeekenc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID)) 
+    MonthEnc = joblib.load("app/vectorizers/MonthEnc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID)) 
+    DayOfMonthEnc = joblib.load("app/vectorizers/DayOfMonthEnc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID)) 
 
     [Weather_Origin_prev, Weather_Origin]=getforecast(DepTime, Origin_Airport_ID)
     [Weather_Dest_prev, Weather_Dest]=getforecast(ArrTime, Dest_Airport_ID)
@@ -41,6 +43,15 @@ def predict(flight):
     
     DaysToHoliday=distancetoholiday(DepTime)
 
+    Month=int(DepTime.strftime("%m"))
+    DayOfWeek=int(DepTime.strftime("%w"))
+    DayOfMonth= int(DepTime.strftime("%d"))
+
+    vec_Airlines=get_vectorized([Airline_ID],Airlinesenc)
+    vec_DayOfWeek=get_vectorized([DayOfWeek],DayOfWeekenc)
+    vec_Month=get_vectorized([Month],MonthEnc)
+    vec_DayOfMonth=get_vectorized([DayOfMonth],DayOfMonthEnc)
+    
     Prcp_Dest=Weather_Dest["PRCP"]
     Snow_Dest=Weather_Dest["SNOW"]
     AWnd_Dest=Weather_Dest["AWND"]
@@ -64,23 +75,25 @@ def predict(flight):
     AWnd_Origin_prev=Weather_Origin_prev["AWND"]
     WSf2_Origin_prev=Weather_Origin_prev["WSF2"]
     WDf2_Origin_prev=Weather_Origin_prev["WDF2"]
-       
+
+    indata = [ DepMidnightHours, ArrMidnightHours, DaysToHoliday,
+               Prcp_Dest,Snow_Dest,AWnd_Dest,WSf2_Dest,WDf2_Dest,
+               Prcp_Dest_prev,Snow_Dest_prev,AWnd_Dest_prev,WSf2_Dest_prev,WDf2_Dest_prev,
+               Prcp_Origin,Snow_Origin,AWnd_Origin,WSf2_Origin,WDf2_Origin,
+               Prcp_Origin_prev,Snow_Origin_prev,AWnd_Origin_prev,WSf2_Origin_prev,WDf2_Origin_prev
+              ]
     
-    Year=int(flightdatetime.strftime("%Y"))
-    Month=int(flightdatetime.strftime("%m"))
-    DayOfWeek=int(flightdatetime.strftime("%w"))
-    DayOfMonth= int(flightdatetime.strftime("%d"))
-    DayNum=int(flightdatetime.strftime("%j"))
-    DepMidnightMinutes=int(flightdatetime.strftime("%H"))*60+int(flightdatetime.strftime("%M"))
+    indata=indata+vec_Airlines[0].tolist()+vec_DayOfWeek[0].tolist()+vec_Month[0].tolist()+vec_DayOfMonth[0].tolist()
+
+    # print indata
+    output = classifier.predict(indata).astype(int)
+    prob = classifier.predict_proba(indata)
+    # print "Output: "+str(output)+" "+str(probs[0])
+    # print '---------'
+    # print classifier.classes_
+    # print '---------'
+    # print probs
+    # for prob, delayclass in zip(classifier.classes_, probs[0]):
+    #     print prob, delayclass
     
-    shiftingholidays=holidays.getholidays(Year,'NY')
-    holidaydeltas=[(flightdatetime.date()-holiday).days for holiday in shiftingholidays]
-    DaysToHoliday=holidaydeltas[np.argmin(np.absolute(np.asarray(holidaydeltas)))]
-    
-    
-    indata=[int(AirlineID), Month, DayOfWeek, DayOfMonth, DayNum, DepMidnightMinutes, DaysToHoliday]
-    
-    output = forest.predict(indata).astype(int)
-    prob = forest.predict_proba(indata)
-    
-    return [output, prob]
+    return [prob[0], classifier.classes_]

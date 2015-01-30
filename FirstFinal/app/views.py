@@ -3,7 +3,7 @@ from app import app
 import pymysql as mdb
 from datetime import datetime
 import urlparse
-from genprediction import predict
+from getconnections import getconnections
 
 @app.route('/')
     
@@ -31,9 +31,38 @@ def cities_output():
 
       flights.append(flight)
 
-  genconnections(flights)
+  [probabilities, route] = getconnections(flights)
+  
+  # if len(flights)>6:
+  #     print "Oh fuck"
+  # else
+  #     colclass=12/len(route)
+  #
+  #             routetext=routetext++str(probability[0])+"</div>"
+
+  routetext="<div class='col-md-12'><h1>"+flights[0]["Origin_Airport_ID"]
+  ontimetext=""
+  
+  for i in range(0,len(flights)):
+      routetext=routetext+"-------->"+flights[i]['Dest_Airport_ID']
+      # routetext=routetext+"<div class=\"col-md-3\"><h1><hr style=\"padding-top=20px; background:#F87431; border:0; height:7px\" /></h1></div><div class=\"col-md-2\" ><h1>"+flights[i]['Dest_Airport_ID']+"</h1></div>"
+        # routetext=routetext+flights[i]['Dest_Airport_ID']
+       
+  routetext=routetext+"</h1></div>" 
+  for i,probability in enumerate(probabilities):
+      print i, len(probabilities)
+      if(i<len(probabilities)-1):
+          if(probability[2]>.5):
+              ontimetext=ontimetext+"<h1 class=\"text-success\">You have a connection in "+str(probability[0])+", but have "+str(probability[1])+ " minutes to connect so we think you'll make it! ({0:.0f}% of success)</h1>".format(100*float(probability[2]))
+          else:
+              ontimetext=ontimetext+"<h1 \"text-danger\">You have a tight connection in "+probability[0]+". You only have "+probability[1]+ " minutes to connect and might not make it ({0:.0f}% of success)</h1>".format(100*float(probability[2]))
+      if(i==len(probabilities)-1):
+          if(probability[2]<=15):
+              ontimetext=ontimetext+"<h1 class=\"text-success\">You should be on time getting into "+probability[0]+" ({0:.0f}% confident)</h1>".format(100*probability[2])
+          else:
+              ontimetext=ontimetext+"<h1 \"text-danger\">You might be late getting into "+probability[0]+". We estimate you will be about "+probability[1]+" minutes late ({0:.0f}% confident)</h1>".format(100*probability[2])
+          
       
-  print flights
   # airline=request.args.get('airline')
   # airport=request.args.get('airport')
   # flightdatetime=
@@ -47,4 +76,4 @@ def cities_output():
   # else:
   #     delayed="<h1 class=\"text-success\">Your flight will probably be on time ({0:.0f}%)".format(100*float(prob[0][0]))+"</h1>"
    # , airline=airline1, airport=airport1, flightdatetime=flightdatetime1, delayed=delayed 
-  return render_template("output.html")
+  return render_template("output.html",ontimetext=ontimetext, routetext=routetext)

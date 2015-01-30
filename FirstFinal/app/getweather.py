@@ -12,7 +12,7 @@ def getjson(lat, lon):
 
     url='http://api.wunderground.com/api/1e514cfbdae56795/forecast10day/q/'+str(lat)+','+str(lon)+'.json'
 
-    print url
+    # print url
 
     f = urllib2.urlopen(url)
     json_forecast = f.read()
@@ -20,8 +20,8 @@ def getjson(lat, lon):
 
 
 def parsejson(flightdate,jsondata):
-    daysinfuture=(flightdate-datetime.date.today()).days
-    print daysinfuture
+    daysinfuture=(flightdate.date()-datetime.date.today()).days
+    # print daysinfuture
     
     data = json.loads(jsondata)
     
