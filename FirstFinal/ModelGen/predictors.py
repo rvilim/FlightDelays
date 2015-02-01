@@ -1,4 +1,5 @@
 import matplotlib
+import json
 
 matplotlib.use('Agg')
 
@@ -90,6 +91,12 @@ def genmodel(fulldelays, origin_airport_id, dest_airport_id):
     # dephoursenc.fit(dephours)
     # arrhoursenc.fit(arrhours)
 
+    flightinfo={}
+    flightinfo["Airlines"]=airlines
+    flightinfo["DayOfWeek"]=dayofweek
+    flightinfo["DayOfMonth"]=dayofmonth
+    flightinfo["Month"]=month
+    
     vec_Airlines=get_vectorized(delays['AirlineID'].values,Airlinesenc)
     vec_DayOfWeek=get_vectorized(delays['DayOfWeek'].values,DayOfWeekenc)
     vec_Month=get_vectorized(delays['Month'].values,MonthEnc)
@@ -128,11 +135,14 @@ def genmodel(fulldelays, origin_airport_id, dest_airport_id):
 
     classifier = GradientBoostingClassifier(n_estimators=100, max_features=63, min_samples_split=57, max_depth=4, min_samples_leaf=14)
     classifier = classifier.fit( X, y)
-
+    
+    with open("vectorizers/Legend_"+str(origin_airport_id)+'->'+str(dest_airport_id)+'.json', 'w') as f: f.write(json.dumps(flightsinfo))
+    f.close()
+    
     joblib.dump(Airlinesenc, "vectorizers/Airlinesenc_"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3) 
     joblib.dump(DayOfWeekenc, "vectorizers/DayOfWeekenc_"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3) 
-    joblib.dump(MonthEnc, "vectorizers/MonthEnc_"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3) 
-    joblib.dump(DayOfMonthEnc, "vectorizers/DayOfMonthEnc_"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3) 
+    joblib.dump(MonthEnc, "vectorizers/Monthenc_"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3) 
+    joblib.dump(DayOfMonthEnc, "vectorizers/DayOfMonthenc_"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3) 
 
     joblib.dump(classifier, "classifiers/"+str(origin_airport_id)+'->'+str(dest_airport_id), compress=3)
 

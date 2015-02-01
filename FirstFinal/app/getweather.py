@@ -12,7 +12,7 @@ def getjson(lat, lon):
 
     url='http://api.wunderground.com/api/1e514cfbdae56795/forecast10day/q/'+str(lat)+','+str(lon)+'.json'
 
-    # print url
+    print url
 
     f = urllib2.urlopen(url)
     json_forecast = f.read()
@@ -24,9 +24,9 @@ def parsejson(flightdate,jsondata):
     # print daysinfuture
     
     data = json.loads(jsondata)
-    
+        
     weather={}
-    
+
     weather["POP"] = int(data['forecast']['simpleforecast']['forecastday'][daysinfuture]['pop'])
     weather["TMAX"] = float(data['forecast']['simpleforecast']['forecastday'][daysinfuture]['high']['celsius'])
     weather["TMIN"] = float(data['forecast']['simpleforecast']['forecastday'][daysinfuture]['low']['celsius'])
@@ -47,8 +47,10 @@ def getforecast(flightdate, Airport_ID):
     location=cur.fetchone()
     lat=location[0]
     lon=location[1]
-    flightdayweather=parsejson(flightdate,getjson(lat,lon))
-    prevdayweather=parsejson(flightdate-datetime.timedelta(days=1),getjson(lat,lon))
+    
+    weatherprediction=getjson(lat,lon)
+    flightdayweather=parsejson(flightdate,weatherprediction)
+    prevdayweather=parsejson(flightdate-datetime.timedelta(days=1),weatherprediction)
     
     return [prevdayweather, flightdayweather]
     
