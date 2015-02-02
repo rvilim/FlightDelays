@@ -51,61 +51,60 @@ def cities_output():
   routetext=routetext+"</h3></div>" 
   
   greatcircletext="var start = { x: "+str(probabilities[0]["Airport_Longitude"])+" , y: "+str(probabilities[0]["Airport_Latitude"])+" };"
-
+  route=[[probabilities[0]["Airport_Latitude"],probabilities[0]["Airport_Longitude"]]]
   
   for i,probability in enumerate(probabilities):
       if(i==0):
           continue
-          
-      greatcircletext=greatcircletext+"var end = { x: "+str(probability["Airport_Longitude"])+", y: "+str(probability["Airport_Latitude"])+" };\
-                           var generator"+str(i)+" = new arc.GreatCircle(start, end, { name: 'Seattle to DC' });\
-                           var line"+str(i)+" = generator"+str(i)+".Arc(100, { offset: 10 });\
-                           L.geoJson(line"+str(i)+".json()).addTo(map);"
-      
-      if(i<len(probabilities)-1):
-          if(probability["ChanceCatch"]>.5):
-              ontimetext=ontimetext+"<h3 class=\"text-success\">-You have a connection in "+str(probability['Airport_Cityname'])+", but have "+str(probability["MinConnect"])+ " minutes to connect so we think you'll make it! ({0:.0f}% of success)</h3>".format(100*float(probability["ChanceCatch"]))
-          else:
-              print probability
-              ontimetext=ontimetext+"<h3 \"text-danger\">-You have a tight connection in "+str(probability['Airport_Cityname'])+". You only have "+str(probability["MinConnect"])+ " minutes to connect and might not make it ({0:.0f}% of success)</h3>".format(100*float(probability["ChanceCatch"]))
-         
-          greatcircletext=greatcircletext+"var start = { x: "+str(probability["Airport_Longitude"])+" , y: "+str(probability["Airport_Latitude"])+" };"
 
-      if(i>0 and i<len(probabilities)-1):
-          ontimetext+='<canvas id="myCanvas" width="300px" height="100px"></canvas> \
-                       <script> \
-                           var canvas = document.getElementById("myCanvas");\
-                           var width = canvas.width;\
-                           var height = canvas.height;\
-                           var planeimgwidth=30;\
-                           var planeimgheight=30;\
-                           var linepadding=5;\
-                           \
-                           var canvas = document.getElementById("myCanvas"); \
-                           var context = canvas.getContext("2d"); \
-                           var imageObj = new Image(); \
-                           imageObj.onload = function() { \
-                               context.drawImage(imageObj, width/2.0-planeimgwidth/2.0, height/2.0-planeimgheight/2.0, planeimgwidth, planeimgheight); \
-                           }; \
-                           imageObj.src = "../static/img/airplane.svg"; \
-                           \
-                           context.beginPath();\
-                           context.setLineDash([5]);\
-                           context.translate(0.5, 0.5);\
-                           context.moveTo(width/2.0, 0);\
-                           context.lineTo(width/2.0, (height-2.0*linepadding-planeimgheight)/2.0);\
-                           context.moveTo(width/2.0, height-(height-2.0*linepadding-planeimgheight)/2.0);\
-                           context.lineTo(width/2.0, height);\
-                           context.stroke();\
-                           </script>'
-          
-          
-      if(i==len(probabilities)-1):
-          if(probability["ArrivalDelay"]<=15):
-              ontimetext=ontimetext+"<h3 class=\"text-success\">-You should be on time getting into "+str(probability['Airport_Cityname'])+" ({0:.0f}% confident)</h1>".format(100*float(probability["ArrivalDelayProb"]))
-          else:
-              ontimetext=ontimetext+"<h3 \"text-danger\">-You might be late getting into "+str(probability['Airport_Cityname'])+". We estimate you will be about "+str(probability["ArrivalDelay"])+" minutes late ({0:.0f}% confident)</h3>".format(100*float(probability["ArrivalDelayProb"]))
-          
+      route.append([probabilities[i]["Airport_Latitude"],probabilities[i]["Airport_Longitude"]])
+      if(i<len(probabilities)-1):
+          print 'hi'
+                
+      # if(i<len(probabilities)-1):
+      #     if(probability["ChanceCatch"]>.5):
+      #         ontimetext=ontimetext+"<h3 class=\"text-success\">-You have a connection in "+str(probability['Airport_Cityname'])+", but have "+str(probability["MinConnect"])+ " minutes to connect so we think you'll make it! ({0:.0f}% of success)</h3>".format(100*float(probability["ChanceCatch"]))
+      #     else:
+      #         print probability
+      #         ontimetext=ontimetext+"<h3 \"text-danger\">-You have a tight connection in "+str(probability['Airport_Cityname'])+". You only have "+str(probability["MinConnect"])+ " minutes to connect and might not make it ({0:.0f}% of success)</h3>".format(100*float(probability["ChanceCatch"]))
+      #
+      #     greatcircletext=greatcircletext+"var start = { x: "+str(probability["Airport_Longitude"])+" , y: "+str(probability["Airport_Latitude"])+" };"
+      #
+      # if(i>0 and i<len(probabilities)-1):
+      #     ontimetext+='<canvas id="myCanvas" width="300px" height="100px"></canvas> \
+      #                  <script> \
+      #                      var canvas = document.getElementById("myCanvas");\
+      #                      var width = canvas.width;\
+      #                      var height = canvas.height;\
+      #                      var planeimgwidth=30;\
+      #                      var planeimgheight=30;\
+      #                      var linepadding=5;\
+      #                      \
+      #                      var canvas = document.getElementById("myCanvas"); \
+      #                      var context = canvas.getContext("2d"); \
+      #                      var imageObj = new Image(); \
+      #                      imageObj.onload = function() { \
+      #                          context.drawImage(imageObj, width/2.0-planeimgwidth/2.0, height/2.0-planeimgheight/2.0, planeimgwidth, planeimgheight); \
+      #                      }; \
+      #                      imageObj.src = "../static/img/airplane.svg"; \
+      #                      \
+      #                      context.beginPath();\
+      #                      context.setLineDash([5]);\
+      #                      context.translate(0.5, 0.5);\
+      #                      context.moveTo(width/2.0, 0);\
+      #                      context.lineTo(width/2.0, (height-2.0*linepadding-planeimgheight)/2.0);\
+      #                      context.moveTo(width/2.0, height-(height-2.0*linepadding-planeimgheight)/2.0);\
+      #                      context.lineTo(width/2.0, height);\
+      #                      context.stroke();\
+      #                      </script>'
+      #
+      #
+      # if(i==len(probabilities)-1):
+      #     if(probability["ArrivalDelay"]<=15):
+      #         ontimetext=ontimetext+"<h3 class=\"text-success\">-You should be on time getting into "+str(probability['Airport_Cityname'])+" ({0:.0f}% confident)</h1>".format(100*float(probability["ArrivalDelayProb"]))
+      #     else:
+      #         ontimetext=ontimetext+"<h3 \"text-danger\">-You might be late getting into "+str(probability['Airport_Cityname'])+". We estimate you will be about "+str(probability["ArrivalDelay"])+" minutes late ({0:.0f}% confident)</h3>".format(100*float(probability["ArrivalDelayProb"]))
+      #
       
   # airline=request.args.get('airline')
   # airport=request.args.get('airport')
@@ -120,4 +119,4 @@ def cities_output():
   # else:
   #     delayed="<h1 class=\"text-success\">Your flight will probably be on time ({0:.0f}%)".format(100*float(prob[0][0]))+"</h1>"
    # , airline=airline1, airport=airport1, flightdatetime=flightdatetime1, delayed=delayed 
-  return render_template("output.html",ontimetext=ontimetext, greatcircletext=greatcircletext, routetext=routetext)
+  return render_template("output.html",route=route)
