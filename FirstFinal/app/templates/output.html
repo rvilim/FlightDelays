@@ -16,12 +16,17 @@
     <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.css' rel='stylesheet' />
     
     <style>
-      #map { position:relative; margin-top:30px; width:100%; min-height:300px; }
+/*margin-top:30px; width:100%; min-height:300px;*/
+      body { margin:0; padding:0; }
+      #map { position:absolute; top:0; bottom:0; width:100%; z-index:0; }
+
     </style>
     
+    <link href="../static/css/itinerary.css" rel="stylesheet">
+        
     <!-- Bootstrap core CSS -->
     <link href="../static/css/bootstrap.min.css" rel="stylesheet">
-    <link href="../static/css/strike.css" rel="stylesheet">
+
 
     <!-- Custom styles for this template -->
     <link href="starter-template.css" rel="stylesheet">
@@ -42,38 +47,28 @@
     <![endif]-->
   </head>
 
-  <body>
-
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Flight Or Plight</a>
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
-    <br><br>
-
-    <div class="container">
+  <body style="height: 100%; overflow: hidden">
+    <div id='map'></div>
       <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/arc.js/v0.1.0/arc.js'></script>
       
-      
 
-      <div class="col-md-6"><div id='map'></div></div>
-      <div class="col-md-6">
-      <h1>Trip Summery</h1>  
-        {{ontimetext|safe}}
+      
+      <div class='itinerary'>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. In posuere eros eget diam ultrices, id finibus eros dictum. Proin rhoncus mauris ex, quis maximus sapien accumsan at. Nam varius blandit ante at aliquam. Nam lobortis dapibus scelerisque. Donec porta accumsan rutrum. Proin vehicula pretium nunc, eget lobortis diam posuere eget. Sed dignissim auctor turpis sit amet finibus.
+
+      Vestibulum vel pretium nibh. Nam non nisl vitae diam sagittis aliquet in aliquam orci. Nulla facilisi. Vivamus vel ligula vel ex varius posuere. Aliquam non aliquam lacus. Phasellus sagittis consequat neque, a venenatis sapien vehicula quis. Sed nulla libero, lobortis vel interdum vitae, congue ac est. Vivamus velit orci, pharetra non interdum ac, tempor tristique leo. Nunc varius, eros in volutpat fringilla, neque ipsum ullamcorper ipsum, eu laoreet ipsum lectus id purus. Proin a nisi ex.
+
+      In hac habitasse platea dictumst. Etiam dapibus enim turpis, ac sagittis libero pellentesque ullamcorper. Maecenas vitae pellentesque quam. Donec in enim purus. Mauris a sapien lectus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed sed felis in justo pharetra commodo. Sed purus mauris, vehicula sed condimentum eu, iaculis quis risus. Integer nunc mi, dapibus eget enim vitae, feugiat ultricies lacus. Quisque orci neque, mollis sit amet ipsum at, tempus convallis dui. Cras euismod lacus in ligula maximus egestas.
+
+      Fusce rutrum lectus eget orci rhoncus, id tincidunt neque viverra. Quisque in laoreet nisi. Sed ac ipsum placerat, pharetra elit quis, eleifend elit. Donec aliquam ornare ipsum. Quisque quis risus at ex egestas rutrum. Etiam sit amet commodo eros, in ullamcorper turpis. Duis lectus dui, pharetra eu leo et, aliquam vulputate lacus. Morbi ultricies, risus ut porttitor tempor, leo libero volutpat lacus, sed hendrerit erat est ac turpis. Etiam et lacus purus. Praesent eget dui malesuada, maximus ante sed, varius augue. Sed ut eleifend neque, eu ultricies ipsum. Donec eget dolor sed sem eleifend mattis. Quisque tellus sapien, ultrices quis auctor in, eleifend et eros. Cras in arcu dictum, euismod dui in, sollicitudin lacus. Aliquam ac metus sit amet felis semper sollicitudin quis mattis magna. Ut et nibh orci.
+
+      Fusce dictum vulputate libero vitae porta. Donec lectus arcu, venenatis non iaculis sed, sagittis quis tortor. Fusce tincidunt erat non enim congue tincidunt. Mauris odio eros, placerat nec placerat et, mattis ac mi. Mauris finibus odio id erat commodo porttitor. Suspendisse luctus nunc dui, sed rutrum est dapibus vel. Suspendisse finibus, lectus in gravida luctus, ligula elit efficitur mi, vel convallis ante leo vel ipsum.
       </div>
+      <!-- <div class="col-md-6">
+      <div class="col-md-6">
+      <h1>Trip Summery</h1>
+        {{ontimetext|safe}}
+      </div> -->
 
       <script>
       L.mapbox.accessToken = 'pk.eyJ1IjoicnZpbGltIiwiYSI6IjFPOGRPZTQifQ.dvrwQEUgm1E_AFVYPhV0bQ';
@@ -84,13 +79,12 @@
       {{greatcircletext|safe}}
       </script>
       
-    </div> <!-- /.container-->
+    <!-- </div> <!-- /.container--> -->
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-
   </body>
 </html>
