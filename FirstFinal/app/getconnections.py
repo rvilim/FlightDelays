@@ -65,13 +65,16 @@ def getconnections(flights):
             # print nextflight["DepTime"], flight["ArrTime"]
             # print contime,  int(contime/15.0)
             for i in range(0,int(contime/15.0)):
-                chancecatch=chancecatch+prob[np.where(delayclass==i)]
-                # print prob
+                probchunk=prob[np.where(delayclass==i)]
+                
+                if probchunk:
+                    chancecatch=chancecatch+probchunk
+                    print chancecatch,prob[np.where(delayclass==i)]
             connection=getairportinfo(nextflight["Origin_Airport_ID"])
             connection["MinConnect"]=minconnect
             connection["ArrivalDelay"]=15*delayclass[np.argmax(prob)]
             connection["ChanceCatch"]=chancecatch
-            
+            print chancecatch, prob, delayclass
             probabilities.append(connection)
             # route=route+[getairportinfo(flight["Dest_Airport_ID"])]
         else:

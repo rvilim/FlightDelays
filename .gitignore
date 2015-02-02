@@ -1,4 +1,5 @@
-
+classifiers
+vectorizers
 *.csv
 
 *.gz

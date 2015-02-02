@@ -30,10 +30,10 @@ def predict(flight):
     
     classifier=joblib.load('app/classifiers/'+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
 
-    Airlinesenc = joblib.load("app/vectorizers/Airlinesenc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID)) 
-    DayOfWeekenc = joblib.load("app/vectorizers/DayOfWeekenc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID)) 
-    MonthEnc = joblib.load("app/vectorizers/MonthEnc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID)) 
-    DayOfMonthEnc = joblib.load("app/vectorizers/DayOfMonthEnc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID)) 
+    Airlinesenc = joblib.load("app/vectorizers/Airlinesenc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
+    DayOfWeekenc = joblib.load("app/vectorizers/DayOfWeekenc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
+    MonthEnc = joblib.load("app/vectorizers/MonthEnc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
+    DayOfMonthEnc = joblib.load("app/vectorizers/DayOfMonthEnc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
 
     [Weather_Origin_prev, Weather_Origin]=getforecast(DepTime, Origin_Airport_ID)
     [Weather_Dest_prev, Weather_Dest]=getforecast(ArrTime, Dest_Airport_ID)
