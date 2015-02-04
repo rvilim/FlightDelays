@@ -62,17 +62,27 @@
         features: []
       };
       
-      // geoJsonData.features.push(styleairport({{route[0]["Airport_Pos"][1]}}, {{route[0]["Airport_Pos"][0]}},1));
-      styleairport({{route[0]["Airport_Pos"][0]}}, {{route[0]["Airport_Pos"][1]}},-1).addTo(map);
-      
-      {% for stopover in stopovers %}
 
-        var {{stopover["Airport_Code"]}}=styleairport({{stopover["Airport_Pos"][0]}}, {{stopover["Airport_Pos"][1]}},1).addTo(map);
+      styleairport({{route[0]["Airport_Pos"][0]}}, {{route[0]["Airport_Pos"][1]}},-1).addTo(map);
+
+      {% for stopover in stopovers %}
         
-        
+        var {{stopover["Airport_Code"]}}=styleairport({{stopover["Airport_Pos"][0]}}, {{stopover["Airport_Pos"][1]}},
+          {% if stopover["ChanceCatch"]<0.5 %}
+            1
+          {% else %}
+            0
+          {% endif %}
+        ).addTo(map); 
       {% endfor %}
-      // geoJsonData.features.push(styleairport({{destination["Airport_Pos"][1]}}, {{destination["Airport_Pos"][0]}},1));
-      styleairport({{destination["Airport_Pos"][0]}}, {{destination["Airport_Pos"][1]}},0).addTo(map);
+      
+      styleairport({{destination["Airport_Pos"][0]}}, {{destination["Airport_Pos"][1]}},
+      {% if destination["ArrivalDelayProb"]>0.5 %}
+        1
+      {% else %}
+        0
+      {% endif %}
+       ).addTo(map);
       
     </script>
       
@@ -83,10 +93,7 @@
         <h1 class='connectioncityname'>Depart from {{route[0]["Airport_Cityname"]}}</h1>
       </div>
       <h1 class='airportcodedepart'>{{route[0]["Airport_Code"]}}</h1>
-      <canvas id="origincanvas" width="300px" height="100px"></canvas>
-      <script type="text/javascript">
-        addflightspacer("origincanvas");
-      </script>
+      <img src="/static/img/airplane_banner.svg" width="300px" height="100px">
       
       {% for stopover in stopovers %}
         <h1 class='airportcodearrive'>{{stopover["Airport_Code"]}}</h1>
@@ -101,10 +108,8 @@
             </div>
           </div>
         <h1 class='airportcodedepart'>{{stopover["Airport_Code"]}}</h1>
-        <canvas id="{{stopover[0]}}canvas" width="300px" height="100px"></canvas>
-        <script type="text/javascript">
-          addflightspacer("{{stopover[0]}}canvas");
-        </script>
+        <img src="/static/img/airplane_banner.svg" width="300px" height="100px">
+
       {% endfor %}
       <h1 class='airportcodearrive'>{{destination["Airport_Code"]}}</h1>
         {% if (destination["ArrivalDelayProb"]<0.50) %}

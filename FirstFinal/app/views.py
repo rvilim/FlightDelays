@@ -70,8 +70,9 @@ def cities_output():
       route.append({"Airport_Pos": [probability["Airport_Latitude"],probability["Airport_Longitude"]], 
                     "Airport_Cityname": probability["Airport_Cityname"], "Airport_Code": probability["Airport_Code"] })
       if(i<len(probabilities)-1):
+          print "hi",probability
           stopovers.append({"Airport_Code": probability['Airport_Code'], "Airport_Cityname": probability['Airport_Cityname'],
-                            "MinConnect": probability["MinConnect"], "ChanceCatch": probability["ChanceCatch"][0],
+                            "MinConnect": probability["MinConnect"], "ChanceCatch": probability["ChanceCatch"],
                             "Airport_Pos": [probability["Airport_Latitude"],probability["Airport_Longitude"]]})
                 
       if(i==len(probabilities)-1):
