@@ -11,6 +11,9 @@
 
     <title>Starter Template for Bootstrap</title>
 
+    <!-- Google fonts -->
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=PT+Sans+Caption" />
+    
     <!-- Mapbox stuff -->
     <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.css' rel='stylesheet' />
@@ -27,13 +30,6 @@
     <!-- Bootstrap core CSS -->
     <link href="../static/css/bootstrap.min.css" rel="stylesheet">
 
-
-    <!-- Custom styles for this template -->
-    <link href="starter-template.css" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/bootstrap-datetimepicker.min.css" />
-    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/static/js/moment.min.js"></script>
@@ -48,19 +44,88 @@
 
   <body style="height: 100%; overflow: hidden">
     <div id='map'></div>
+
     <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/arc.js/v0.1.0/arc.js'></script>
     <script type="text/javascript" src="/static/js/addarc.js"></script>
+    <script type="text/javascript" src="/static/js/styleairport.js"></script>
     <script>
       L.mapbox.accessToken = 'pk.eyJ1IjoicnZpbGltIiwiYSI6IjFPOGRPZTQifQ.dvrwQEUgm1E_AFVYPhV0bQ';
       var map = L.mapbox.map('map', 'rvilim.ea1ccadd').setView([42.87596410238254, -85.546875], 4);
-    {% for x in route %}
-      {% if (loop.last)!=true%}
-      L=addarc({{x[0]}}, {{x[1]}}, {{route[loop.index0+1][0]}}, {{route[loop.index0+1][1]}}, L, map);
-      {% endif %}
-    {% endfor %} 
-    </script>
-    <div class='itinerary'>
+      {% for leg in route%}
+        {% if( loop.first == false) %}
+        addarc({{leg["Airport_Pos"][0]}}, {{leg["Airport_Pos"][1]}}, {{route[loop.index0-1]["Airport_Pos"][0]}}, {{route[loop.index0-1]["Airport_Pos"][1]}}, L, map)
+        {% endif %}
+      {% endfor %}
       
+      var geoJsonData = {
+        type: "FeatureCollection",
+        features: []
+      };
+      
+      // geoJsonData.features.push(styleairport({{route[0]["Airport_Pos"][1]}}, {{route[0]["Airport_Pos"][0]}},1));
+      styleairport({{route[0]["Airport_Pos"][0]}}, {{route[0]["Airport_Pos"][1]}},-1).addTo(map);
+      
+      {% for stopover in stopovers %}
+
+        var {{stopover["Airport_Code"]}}=styleairport({{stopover["Airport_Pos"][0]}}, {{stopover["Airport_Pos"][1]}},1).addTo(map);
+        
+        
+      {% endfor %}
+      // geoJsonData.features.push(styleairport({{destination["Airport_Pos"][1]}}, {{destination["Airport_Pos"][0]}},1));
+      styleairport({{destination["Airport_Pos"][0]}}, {{destination["Airport_Pos"][1]}},0).addTo(map);
+      
+    </script>
+      
+    <div class='itinerary'>
+      <script type="text/javascript" src="/static/js/addflightspacer.js"></script>
+
+      <div class='origin'>
+        <h1 class='connectioncityname'>Depart from {{route[0]["Airport_Cityname"]}}</h1>
+      </div>
+      <h1 class='airportcodedepart'>{{route[0]["Airport_Code"]}}</h1>
+      <canvas id="origincanvas" width="300px" height="100px"></canvas>
+      <script type="text/javascript">
+        addflightspacer("origincanvas");
+      </script>
+      
+      {% for stopover in stopovers %}
+        <h1 class='airportcodearrive'>{{stopover["Airport_Code"]}}</h1>
+          {% if stopover["ChanceCatch"]<0.5 %}
+          <div class='stopover bad'>
+          {% else %}
+          <div class='stopover good'>
+          {% endif %}
+            <h1 class='connectioncityname'>Transfer in {{stopover["Airport_Cityname"]}}</h1>
+            <div class='connectioninformation'>
+              You have {{stopover["MinConnect"]}} minutes to connect in San Francisco. You have a {{(100*stopover["ChanceCatch"])|round|int}}% chance of making your connection.
+            </div>
+          </div>
+        <h1 class='airportcodedepart'>{{stopover["Airport_Code"]}}</h1>
+        <canvas id="{{stopover[0]}}canvas" width="300px" height="100px"></canvas>
+        <script type="text/javascript">
+          addflightspacer("{{stopover[0]}}canvas");
+        </script>
+      {% endfor %}
+      <h1 class='airportcodearrive'>{{destination["Airport_Code"]}}</h1>
+        {% if (destination["ArrivalDelayProb"]<0.50) %}
+        <div class='stopover good'>  
+        {% else %}
+        <div class='stopover bad'>  
+        {% endif %}
+        
+        <h1 class='connectioncityname'>Arrive in {{destination["Airport_Cityname"]}}</h1>
+
+        {% if (destination["ArrivalDelayProb"]<0.50) %}
+          <div class='connectioninformation'>
+          You will probably arrive in {{destination["Airport_Cityname"]}} on time  ({{(100*destination["ArrivalDelayProb"])|round|int}}% chance of delay.)
+          </div>
+        {% else %}
+          <div class='connectioninformation'>
+            You will probably arrive in {{destination["Airport_Cityname"]}} late. 
+            There is a ({{(100*destination["ArrivalDelayProb"])|round|int}}% chance you will be delayed.)
+          </div>
+        {% endif %}
+      </div>
     </div>
 
 

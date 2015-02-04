@@ -51,16 +51,34 @@ def cities_output():
   routetext=routetext+"</h3></div>" 
   
   greatcircletext="var start = { x: "+str(probabilities[0]["Airport_Longitude"])+" , y: "+str(probabilities[0]["Airport_Latitude"])+" };"
-  route=[[probabilities[0]["Airport_Latitude"],probabilities[0]["Airport_Longitude"]]]
+  route=[]
+  airport={}
+  airport["Airport_Pos"]=[probabilities[0]["Airport_Latitude"],probabilities[0]["Airport_Longitude"]]
+  airport["Airport_Cityname"]=probabilities[0]["Airport_Cityname"]
+  airport["Airport_Code"]=probabilities[0]["Airport_Code"]
+  route.append(airport)
+  
+  print route
+  
+  stopovers=[]
   
   for i,probability in enumerate(probabilities):
       if(i==0):
           continue
 
-      route.append([probabilities[i]["Airport_Latitude"],probabilities[i]["Airport_Longitude"]])
+      
+      route.append({"Airport_Pos": [probability["Airport_Latitude"],probability["Airport_Longitude"]], 
+                    "Airport_Cityname": probability["Airport_Cityname"], "Airport_Code": probability["Airport_Code"] })
       if(i<len(probabilities)-1):
-          print 'hi'
+          stopovers.append({"Airport_Code": probability['Airport_Code'], "Airport_Cityname": probability['Airport_Cityname'],
+                            "MinConnect": probability["MinConnect"], "ChanceCatch": probability["ChanceCatch"][0],
+                            "Airport_Pos": [probability["Airport_Latitude"],probability["Airport_Longitude"]]})
                 
+      if(i==len(probabilities)-1):
+          # destination=[probability['Airport_Code'], probability['Airport_Cityname'], probability["ArrivalDelay"], probability ["ArrivalDelayProb"]]
+          destination={"Airport_Code": probability['Airport_Code'],  "Airport_Cityname": probability['Airport_Cityname'],
+                       "ArrivalDelay": probability["ArrivalDelay"], "ArrivalDelayProb": probability ["ArrivalDelayProb"],
+                       "Airport_Pos": [probability["Airport_Latitude"],probability["Airport_Longitude"]]}
       # if(i<len(probabilities)-1):
       #     if(probability["ChanceCatch"]>.5):
       #         ontimetext=ontimetext+"<h3 class=\"text-success\">-You have a connection in "+str(probability['Airport_Cityname'])+", but have "+str(probability["MinConnect"])+ " minutes to connect so we think you'll make it! ({0:.0f}% of success)</h3>".format(100*float(probability["ChanceCatch"]))
@@ -119,4 +137,4 @@ def cities_output():
   # else:
   #     delayed="<h1 class=\"text-success\">Your flight will probably be on time ({0:.0f}%)".format(100*float(prob[0][0]))+"</h1>"
    # , airline=airline1, airport=airport1, flightdatetime=flightdatetime1, delayed=delayed 
-  return render_template("output.html",route=route)
+  return render_template("output.html",route=route, stopovers=stopovers, destination=destination)

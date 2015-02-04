@@ -3,20 +3,101 @@
   right:0px;
   top:0px;
   
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.85);
     
   width:300px;
   height:100%;
 
   padding-left: 0px;
-  padding-top: 50px;
+  padding-top: 15px;
   padding-right:0px;
-  padding-bottom:50px;
+  padding-bottom:15px;
   
   z-index: 1;
   overflow: scroll;
 }
 
-hr.dottedline{
+.stopover{
+  width:100%;
+  border-left-style: solid;
+  border-width: 5px;
+  padding-top:10px;
+  padding-bottom:10px;
+}
+
+.stopover.good{
+  border-color:#9EBF6D;
+}
+
+.stopover.bad{
+  border-color:#FA6C61;
+}
+
+
+.destination{
+  width:100%;
+  padding-left:10px;
+  padding-right:10px;
+}
+
+.origin{
+  width:100%;
+  padding-left:10px;
+  padding-right:10px;
+}
+
+.connectioninformation{
+  width:100%;
+  margin-left:0px;
+  margin-right:0px;
+  padding-left:10px;
+  padding-right:10px;
+}
+
+h1.airportcodedepart{
+  text-align: center;
+	font-family: 'PT Sans Caption';
+	font-size: 18px;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: bold;
+	line-height: 18px;
+  padding-bottom:0px;  
+  margin-bottom:0px;
+  opacity:0.5;
   
+  margin-top:0px;
+  margin-bottom:0px;
+}
+
+h1.airportcodearrive{
+  text-align: center;
+	font-family: 'PT Sans Caption';
+	font-size: 18px;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: bold;
+	line-height: 18px;
+  padding-top:0px;  
+  margin-top:0px;
+  opacity:0.5;
+  
+  margin-top:0px;
+  margin-bottom:0px;
+}
+
+h1.connectioncityname{
+  margin-top:0px;
+  margin-left:0px;
+  margin-right:0px;
+  padding-left:10px;
+  padding-right:10px;
+  
+  text-align: left;
+	font-family: 'PT Sans Caption';
+	font-size: 18px;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: bold;
+	line-height: 18px;
 }
