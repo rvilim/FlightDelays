@@ -17,7 +17,7 @@ def cities_output():
   #pull '' from input field and store it
   
   flights=[]
-  
+
   parsed = urlparse.urlparse(request.url)
   urlvars=urlparse.parse_qs(parsed.query)
   for i in range(1,(len(urlvars)/4+1)):
