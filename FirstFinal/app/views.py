@@ -1,25 +1,137 @@
-from flask import render_template, request,Markup
+from flask import Flask,render_template, request,Markup, jsonify, Response
+# from cors import flask_cors
 from app import app
-
+from flask.ext.cors import CORS
 from datetime import datetime
 import urlparse
+import lookups
+import urllib, json
 from getconnections import getconnections
+import pymysql as mdb
 
 @app.route('/')
-    
+
+
+            
 @app.route('/index')
 def cities_input():
-    return render_template("input.html")
+    return render_template("input2.html")
+  
+@app.route('/flightinfo')
+def flightinfo():
     
+    parsed = urlparse.urlparse(request.url)
+    urlvars=urlparse.parse_qs(parsed.query)
 
+    fsurl="https://api.flightstats.com/flex/schedules/rest/v1/json/flight/"
+    fsurl+= urlvars['flightairline'][0]+"/"
+    fsurl+= urlvars['flightnumber'][0]+"/departing/"
+    fsurl+= urlvars['flightdate'][0]+"?appId=bd500382&appKey=a43d87e86904446f95123cdac297e934";
+
+    print fsurl
+    response = urllib.urlopen(fsurl);
+    data = json.loads(response.read())
+
+    returnflights={}
+    i=0
+    for scheduledFlight in data['scheduledFlights']:
+        
+        flight={}
+        if ("isCodeshare" =="true"):
+            flight["AirlineID"]=lookups.LookupAirline(scheduledFlight["operator"]["carrierFsCode"])[0]
+        else:
+            flight["AirlineID"]=lookups.LookupAirline(scheduledFlight["carrierFsCode"])[0]
+            
+        Origin_Airport=lookups.LookupAirport(scheduledFlight["departureAirportFsCode"])
+        Dest_Airport=lookups.LookupAirport(scheduledFlight["arrivalAirportFsCode"])
+
+        if((Origin_Airport is None) or (Dest_Airport is None)):
+            returnflights={"Error" : "Airport Not Found"}
+            return Response(response=json.dumps(returnflights), status=200, mimetype="text/plain")
+            
+        flight["DepTime"]=datetime.strftime(\
+                                      datetime.strptime(scheduledFlight["departureTime"], '%Y-%m-%dT%H:%M:%S.000')\
+                                      , '%m/%d/%Y %I:%M %p')
+        
+        flight["ArrTime"]=datetime.strftime(\
+                                      datetime.strptime(scheduledFlight["arrivalTime"], '%Y-%m-%dT%H:%M:%S.000') \
+                                      , '%m/%d/%Y %I:%M %p')
+        
+
+        flight["Origin_Airport_ID"]=Origin_Airport[0]
+        flight["Dest_Airport_ID"]=Dest_Airport[0]
+        flight["Origin_Airport_Code"]=Origin_Airport[1]
+        flight["Dest_Airport_Code"]=Dest_Airport[1]
+        flight["Origin_Airport_Name"]=Origin_Airport[2]
+        flight["Dest_Airport_Name"]=Dest_Airport[2]
+
+        returnflights[i]=flight
+
+        i=i+1
+    return Response(response=json.dumps(returnflights), status=200, mimetype="text/plain")# application/json
+      
+@app.route('/options')
+def airports_output():
+    con = mdb.connect('localhost', 'root', '', 'flights') #host, user, password, #database
+    parsed = urlparse.urlparse(request.url)
+    urlvars=urlparse.parse_qs(parsed.query)
+    
+    html=''
+    airports=''
+    # if('Origin_Airport_ID' not in urlvars):
+    #     with con:
+    #         query="select Airport_ID, Airport_Cityname FROM Airports WHERE 1;";
+    #         cur = con.cursor()
+    #         cur.execute(query)
+    #
+    #         query_results = cur.fetchall()
+    #
+    #         airports={}
+    #         for result in query_results:
+    #             airports[result[0]]=result[1]
+    #             # html=html+'<option value="'+str(result[0])+'">'+result[1]+'</option>\n'
+    # else if ('Dest_Airport_ID' not in urlvars):
+    #     with con:
+    #         query="select Airport_ID, Airport_Cityname FROM Airports WHERE Ori;";
+    #         cur = con.cursor()
+    #         cur.execute(query)
+    #
+    #         query_results = cur.fetchall()
+    #
+    #         airports={}
+    #         for result in query_results:
+    #             airports[result[0]]=result[1]
+        
+    return jsonify(airports)
+    
 @app.route('/output')
 def cities_output():
   #pull '' from input field and store it
   
   flights=[]
-
+  #
   parsed = urlparse.urlparse(request.url)
   urlvars=urlparse.parse_qs(parsed.query)
+  #
+  # print urlvars['bycode'][0]
+  # if(urlvars['bycode'][0]=="1"):
+  #     numlegs=urlvars['numlegs'][0]
+  #     print "hi**********"
+  #
+  #     for i in range(1, int(numlegs)+1):
+  #         fsurl="https://api.flightstats.com/flex/schedules/rest/v1/json/flight/"
+  #         fsurl+= urlvars['flightairline'+str(i)][0]+"/"
+  #         fsurl+= urlvars['flightnumber'+str(i)][0]+"/departing/"
+  #         fsurl+= urlvars['flightdate'+str(i)][0]+"?appId=bd500382&appKey=a43d87e86904446f95123cdac297e934";
+  #
+  #         response = urllib.urlopen(fsurl);
+  #         data = json.loads(response.read())
+  #
+  #         for leg in data["scheduledFlights"]:
+  #             print leg
+  #     # for i in range(1,(len(urlvars)))
+      
+    #
   for i in range(1,(len(urlvars)/4+1)):
       request.args.get('flightdatetime')
       flight={}

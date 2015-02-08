@@ -31,6 +31,48 @@
       return $('#newleg').html().replace(/legnumber/g,x);      
     }
     
+    function lookupflight(x){
+      url='/flightinfo?flightairline='+$("#flightairline"+x).val()+"&flightnumber="
+      url=url+$("#flightnumber"+x).val()+"&flightdate="+$("#flightdate"+x).val()
+      
+      console.log(url);
+      
+      console.log('Hello');
+      
+      alert ($("#disambiguateflight"+x).length);
+      if ($("#disambiguateflight"+x).length ) {
+        $("#disambiguateflight"+x).remove();
+      }
+      
+      $.getJSON( url, function( data ) {
+        if(Object.keys(data)[0]=="Error"){
+          console.log(data.Error)
+        }else{
+          //If we only returned one element from the JSON, there is only one flight with that flight number on that date
+          if(Object.keys(data).length==1){
+            console.log("Only One flight");
+            console.log(data);          
+          } else {
+            
+            $("<select name=\'disambiguateflight"+x+"\' id=\'disambiguateflight"+x+"\'>").appendTo($("#disambiguateflights"+x))
+            
+            for (var key in Object.keys(data)) {
+              console.log(data[key]['DepTime'], data[key]['ArrTime'], data[key]['AirlineID'], data[key]['Origin_Airport_ID'], data[key]['Dest_Airport_ID']);
+              $("<option>"+data[key]['Origin_Airport_Name']+" &#8594; " +data[key]['Dest_Airport_Name']+"</option>").appendTo($("#disambiguateflight"+x))
+            }
+            $("</select>").appendTo($("#disambiguateflights"+x))
+            console.log("More than one flight");
+          }
+          // Set stuff in our hidden boxes, either the first flight of our dropdown, or the only flight of a unique flight.
+          $('#flightarrtime'+x).val(data['0']['DepTime']);
+          $('#flightdeptime'+x).val(data['0']['ArrTime']);
+          $('#airline'+x).val(data['0']['AirlineID']);
+          $('#originairport'+x).val(data['0']['Origin_Airport_ID']);
+          $('#destairport'+x).val(data['0']['Dest_Airport_ID']);  
+        }
+      });
+    }
+    
     $(document).ready(function() {
         var max_fields      = 10; //maximum input boxes allowed
         var wrapper         = $(".input_fields_wrap"); //Fields wrapper
@@ -43,14 +85,21 @@
                 x++; //text box increment
                 $(wrapper).append(newflight(x)); //add input box
 
-                $('#flightdate'+x).datetimepicker({
-                format: 'DD/MM/YYYY'
+                $('#flightdatecontainer'+x).datetimepicker({
+                format: 'YYYY/MM/D'
                 });
+                
+                $( "#flightnumber"+x ).change(function() {
+                  lookupflight(x);
+                });
+                
+                $( "#numlegs" ).val(x)
             }
         });
     
         $(wrapper).on("click",".remove_field", function(e){ //user click on remove text
             e.preventDefault(); $(this).parent('div').parent('div').remove(); x--;
+            $( "#numlegs" ).val(x)
         })
     });
     </script>
@@ -66,23 +115,59 @@
     <div id="newleg">
       <div class="row">
         <div class="col-md-3">
-        
+        <input type="hidden" name="flightdeptimelegnumber" id="flightdeptimelegnumber">
+        <input type="hidden" name="flightarrtimelegnumber" id="flightarrtimelegnumber">
+        <input type="hidden" name="airlinelegnumber" id="airlinelegnumber">
+        <input type="hidden" name="originairportlegnumber" id="originairportlegnumber">
+        <input type="hidden" name="destairportlegnumber" id="destairportlegnumber">
         </div>
         <div class="col-md-3">
-          <select name="flightairlinelegnumber" class="form-control">
-              <option value="19805">American Airlines</option>
+          <select id="flightairlinelegnumber" name="flightairlinelegnumber" class="form-control">
+            <option value="AA">American Airlines</option>
+            <option value="DL">Delta Air Lines</option>
+            <option value="G7">GoJet Airlines</option>
+            <option value="B6">JetBlue Airways</option>
+            <option value="WN">Southwest Airlines</option>
+            <option value="UA">United Air Lines</option>
+            <option value="US">US Airways</option>
+            <option value="VX">Virgin America</option>
+            <option value="ZW">Air Wisconsin Airlines</option>
+            <option value="FL">AirTran Airways</option>
+            <option value="AS">Alaska Airlines</option>
+            <option value="G4">Allegiant Air</option>
+            <option value="RP">Chautauqua Airlines</option>
+            <option value="C5">Commutair</option>
+            <option value="CP">Compass Airlines</option>
+            <option value="9E">Endeavor Air</option>
+            <option value="MQ">Envoy Air</option>
+            <option value="EV">ExpressJet Airlines</option>
+            <option value="F9">Frontier Airlines</option>
+            <option value="HA">Hawaiian Airlines</option>
+            <option value="QX">Horizon Air</option>
+            <option value="YV">Mesa Airlines</option>
+            <option value="PDT">Piedmont Airlines</option>
+            <option value="JIA">PSA Airlines</option>
+            <option value="YX">Republic Airlines</option>
+            <option value="S5">Shuttle America</option>
+            <option value="OO">SkyWest Airlines</option>
+            <option value="NK">Spirit Air Lines</option>
+            <option value="SY">Sun Country Airlines</option>
+            <option value="AX">Trans States Airlines</option>
           </select>
         </div>
         <div class="col-md-3">
-          <div class='input-group date' id='flightdatelegnumber'>
-              <input name="flightdatelegnumber" type='text' class="form-control" />
+          <div class='input-group date' id='flightdatecontainerlegnumber'>
+              <input id="flightdatelegnumber" name="flightdatelegnumber" type='text' class="form-control" />
               <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
               </span>
           </div>
         </div>
         <div class="col-md-2">
-          <input name="flightnumberlegnumber" type='text' class="form-control" />
-        </div>        
+          <input id="flightnumberlegnumber" name="flightnumberlegnumber" type='text' class="form-control" />
+        </div>    
+        <div id="disambiguateflightslegnumber" class="col-md-1">
+          
+        </div>    
         <div class="col-md-1">
         <a href="#" class="remove_field">Remove</a>
         </div>
@@ -117,30 +202,74 @@
             </div>
             <div class="row">
               <div class="col-md-3">
+                <input type="hidden" name="bycode" value="1">
+                <input type="hidden" name="numlegs" id="numlegs" value="1">
               
+                <input type="hidden" name="flightdeptime1" id="flightdeptime1">
+                <input type="hidden" name="flightarrtime1" id="flightarrtime1">
+                <input type="hidden" name="airline1" id="airline1">
+                <input type="hidden" name="originairport1" id="originairport1">
+                <input type="hidden" name="destairport1" id="destairport1">
               </div>
               <div class="col-md-3">
-                <select name="flightairline1" class="form-control">
-                    <option value="19805">American Airlines</option>
+                <select id="flightairline1" name="flightairline1" class="form-control">
+                    <option value="AA">American Airlines</option>
+                    <option value="DL">Delta Air Lines</option>
+                    <option value="G7">GoJet Airlines</option>
+                    <option value="B6">JetBlue Airways</option>
+                    <option value="WN">Southwest Airlines</option>
+                    <option value="UA">United Air Lines</option>
+                    <option value="US">US Airways</option>
+                    <option value="VX">Virgin America</option>
+                    <option value="ZW">Air Wisconsin Airlines</option>
+                    <option value="FL">AirTran Airways</option>
+                    <option value="AS">Alaska Airlines</option>
+                    <option value="G4">Allegiant Air</option>
+                    <option value="RP">Chautauqua Airlines</option>
+                    <option value="C5">Commutair</option>
+                    <option value="CP">Compass Airlines</option>
+                    <option value="9E">Endeavor Air</option>
+                    <option value="MQ">Envoy Air</option>
+                    <option value="EV">ExpressJet Airlines</option>
+                    <option value="F9">Frontier Airlines</option>
+                    <option value="HA">Hawaiian Airlines</option>
+                    <option value="QX">Horizon Air</option>
+                    <option value="YV">Mesa Airlines</option>
+                    <option value="PDT">Piedmont Airlines</option>
+                    <option value="JIA">PSA Airlines</option>
+                    <option value="YX">Republic Airlines</option>
+                    <option value="S5">Shuttle America</option>
+                    <option value="OO">SkyWest Airlines</option>
+                    <option value="NK">Spirit Air Lines</option>
+                    <option value="SY">Sun Country Airlines</option>
+                    <option value="AX">Trans States Airlines</option>
                 </select>
               </div>
               <div class="col-md-3">
-                <div class='input-group date' id='flightdate1'>
-                    <input name='flightdate1' type='text' class="form-control" />
+                <div class='input-group date' id='flightdatecontainer1'>
+                    <input id='flightdate1' name='flightdate1' type='text' class="form-control" />
                     <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
                     </span>
                 </div>
                 <script type="text/javascript">
                   $(function () {
-                    $('#flightdate1').datetimepicker({
-                    format: 'DD/MM/YYYY'
+                    $('#flightdatecontainer1').datetimepicker({
+                    format: 'YYYY/MM/D'
                     });
                   });
                 </script>
               </div>
               <div class="col-md-2">
-                <input name="flightnumber1" type='text' class="form-control" />
-              </div>        
+                <input id="flightnumber1" name="flightnumber1" type='text' class="form-control" />
+                <script type="text/javascript">
+                  $( "#flightnumber1" ).change(function() {
+                    lookupflight(1);
+                  });
+                </script>
+              </div>
+              <div id="disambiguateflights1" class="col-md-1">
+                
+              </div>
               <div class="col-md-1">
               <a href="#" class="remove_field">Remove</a>
               </div>
