@@ -1,5 +1,4 @@
 from flask import Flask,render_template, request,Markup, jsonify, Response
-# from cors import flask_cors
 from app import app
 from flask.ext.cors import CORS
 from datetime import datetime
@@ -34,6 +33,10 @@ def flightinfo():
 
     returnflights={}
     i=0
+    
+    print "hi", data['scheduledFlights']
+    if (not data['scheduledFlights']):
+        returnflights={"Error" : "Flight not found"}
     for scheduledFlight in data['scheduledFlights']:
         
         flight={}
@@ -46,7 +49,7 @@ def flightinfo():
         Dest_Airport=lookups.LookupAirport(scheduledFlight["arrivalAirportFsCode"])
 
         if((Origin_Airport is None) or (Dest_Airport is None)):
-            returnflights={"Error" : "Airport Not Found"}
+            returnflights={"Error" : "The origin or destination airport was not found"}
             return Response(response=json.dumps(returnflights), status=200, mimetype="text/plain")
             
         flight["DepTime"]=datetime.strftime(\
@@ -131,9 +134,9 @@ def cities_output():
   #             print leg
   #     # for i in range(1,(len(urlvars)))
       
-    #
-  for i in range(1,(len(urlvars)/4+1)):
-      request.args.get('flightdatetime')
+
+  numlegs=urlvars['numlegs'][0]
+  for i in range(1,int(numlegs)+1):
       flight={}
       flight["DepTime"]=datetime.strptime(urlvars['flightdeptime'+str(i)][0], '%m/%d/%Y %I:%M %p')
       flight["ArrTime"]=datetime.strptime(urlvars['flightarrtime'+str(i)][0], '%m/%d/%Y %I:%M %p')
@@ -145,20 +148,11 @@ def cities_output():
 
   probabilities = getconnections(flights)
   
-  # if len(flights)>6:
-  #     print "Oh fuck"
-  # else
-  #     colclass=12/len(route)
-  #
-  #             routetext=routetext++str(probability[0])+"</div>"
-
   routetext="<div class='col-md-12'><h3>"+probabilities[0]["Airport_Code"]
   ontimetext=""
   
   for i in range(1,len(flights)+1):
       routetext=routetext+"-->"+probabilities[i]['Airport_Code']
-      # routetext=routetext+"<div class=\"col-md-3\"><h1><hr style=\"padding-top=20px; background:#F87431; border:0; height:7px\" /></h1></div><div class=\"col-md-2\" ><h1>"+flights[i]['Dest_Airport_ID']+"</h1></div>"
-        # routetext=routetext+flights[i]['Dest_Airport_ID']
        
   routetext=routetext+"</h3></div>" 
   
@@ -182,7 +176,6 @@ def cities_output():
       route.append({"Airport_Pos": [probability["Airport_Latitude"],probability["Airport_Longitude"]], 
                     "Airport_Cityname": probability["Airport_Cityname"], "Airport_Code": probability["Airport_Code"] })
       if(i<len(probabilities)-1):
-          print "hi",probability
           stopovers.append({"Airport_Code": probability['Airport_Code'], "Airport_Cityname": probability['Airport_Cityname'],
                             "MinConnect": probability["MinConnect"], "ChanceCatch": probability["ChanceCatch"],
                             "Airport_Pos": [probability["Airport_Latitude"],probability["Airport_Longitude"]]})
