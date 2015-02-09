@@ -32,8 +32,8 @@ def predict(flight):
 
     Airlinesenc = joblib.load("app/vectorizers/Airlinesenc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
     DayOfWeekenc = joblib.load("app/vectorizers/DayOfWeekenc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
-    MonthEnc = joblib.load("app/vectorizers/MonthEnc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
-    DayOfMonthEnc = joblib.load("app/vectorizers/DayOfMonthEnc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
+    Monthenc = joblib.load("app/vectorizers/Monthenc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
+    DayOfMonthenc = joblib.load("app/vectorizers/DayOfMonthenc_"+str(Origin_Airport_ID)+'->'+str(Dest_Airport_ID))
 
     [Weather_Origin_prev, Weather_Origin]=getforecast(DepTime, Origin_Airport_ID)
     [Weather_Dest_prev, Weather_Dest]=getforecast(ArrTime, Dest_Airport_ID)
@@ -49,8 +49,8 @@ def predict(flight):
 
     vec_Airlines=get_vectorized([Airline_ID],Airlinesenc)
     vec_DayOfWeek=get_vectorized([DayOfWeek],DayOfWeekenc)
-    vec_Month=get_vectorized([Month],MonthEnc)
-    vec_DayOfMonth=get_vectorized([DayOfMonth],DayOfMonthEnc)
+    vec_Month=get_vectorized([Month],Monthenc)
+    vec_DayOfMonth=get_vectorized([DayOfMonth],DayOfMonthenc)
     
     Prcp_Dest=Weather_Dest["PRCP"]
     Snow_Dest=Weather_Dest["SNOW"]

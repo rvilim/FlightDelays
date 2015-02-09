@@ -34,7 +34,7 @@ def getconnections(flights):
 
     # a=iter(flights)
 
-    minconnect=30    
+    minconnect=45    
     
     # route=[getairportinfo(flights[0]["Origin_Airport_ID"])]
     probabilities.append(getairportinfo(flights[0]["Origin_Airport_ID"]))

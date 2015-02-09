@@ -9,12 +9,13 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>Starter Template for Bootstrap</title>
+    <title>Flight or Plight</title>
 
     <!-- Google fonts -->
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=PT+Sans+Caption" />
     
     <!-- Mapbox stuff -->
+    <script>L_DISABLE_3D = true;</script>
     <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.css' rel='stylesheet' />
     
@@ -104,7 +105,7 @@
           {% endif %}
             <h1 class='connectioncityname'>Transfer in {{stopover["Airport_Cityname"]}}</h1>
             <div class='connectioninformation'>
-              You have {{stopover["MinConnect"]}} minutes to connect in San Francisco. You have a {{(100*stopover["ChanceCatch"])|round|int}}% chance of making your connection.
+              You need at least {{stopover["MinConnect"]}} minutes to connect in San Francisco. You have a {{(100*stopover["ChanceCatch"])|round|int}}% chance of making your connection.
             </div>
           </div>
         <h1 class='airportcodedepart'>{{stopover["Airport_Code"]}}</h1>
@@ -127,7 +128,7 @@
         {% else %}
           <div class='connectioninformation'>
             You will probably arrive in {{destination["Airport_Cityname"]}} late. 
-            There is a ({{(100*destination["ArrivalDelayProb"])|round|int}}% chance you will be delayed.)
+            There is a {{(100*destination["ArrivalDelayProb"])|round|int}}% chance you will be delayed.
           </div>
         {% endif %}
       </div>

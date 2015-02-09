@@ -1,6 +1,5 @@
 from flask import Flask,render_template, request,Markup, jsonify, Response
 from app import app
-from flask.ext.cors import CORS
 from datetime import datetime
 import urlparse
 import lookups

@@ -900,13 +900,14 @@ html {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+/*  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+  font-family: 'PT Sans Caption';
   font-size: 14px;
   line-height: 1.42857143;
   color: #333;
   background-color: #fff;
   
-  background: url(/static/img/airportmorning_cropped.jpg) no-repeat center center fixed; 
+  background: url(/static/img/clouds.jpeg) no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -5597,7 +5598,8 @@ button.close {
   position: absolute;
   z-index: 1070;
   display: block;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+/*  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+  font-family: 'PT Sans Caption';
   font-size: 12px;
   font-weight: normal;
   line-height: 1.4;
@@ -5705,7 +5707,8 @@ button.close {
   display: none;
   max-width: 276px;
   padding: 1px;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+/*  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+  font-family: 'PT Sans Caption';
   font-size: 14px;
   font-weight: normal;
   line-height: 1.42857143;

@@ -42,7 +42,7 @@ def getforecast(flightdate, Airport_ID):
     conn = mdb.connect('localhost', 'root', '', 'flights') #host, user, password, #database
     cur = conn.cursor()
 
-    query="SELECT X(Position),Y(Position) FROM AIRPORTS WHERE Airport_ID="+str(Airport_ID)+";"
+    query="SELECT X(Position),Y(Position) FROM Airports WHERE Airport_ID="+str(Airport_ID)+";"
     cur.execute(query)
     location=cur.fetchone()
     lat=location[0]

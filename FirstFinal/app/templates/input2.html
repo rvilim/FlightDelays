@@ -9,12 +9,14 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>Starter Template for Bootstrap</title>
+    <title>Flight or Plight</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <link href="/static/css/datepicker3.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css" />
+    <!-- Google fonts -->
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=PT+Sans+Caption" />
     
     <!-- Custom styles for this template -->
     <!-- <link href="starter-template.css" rel="stylesheet"> -->
@@ -25,8 +27,9 @@
     <script type="text/javascript" src="/static/js/bootstrap.js"></script>
     <script type="text/javascript" src="/static/js/moment.min.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap-datetimepicker.min.js"></script>
- 
+     
     <script type="text/javascript">
+  
     function newflight(x){
       return $('#newleg').html().replace(/legnumber/g,x);      
     }
@@ -54,7 +57,16 @@
             console.log("Only One flight");
             console.log();  
                  
-            $('<div id="disambiguateflight'+x+'"><button type="button" class="btn btn-default">'+data[0]['Origin_Airport_Name']+" &#8594; " +data[0]['Dest_Airport_Name']+'</button></div>').appendTo($("#disambiguateflights"+x))
+            // $('<div id="disambiguateflight'+x+'"><button type="button" class="btn btn-default">'+data[0]['Origin_Airport_Name']+" &#8594; " +data[0]['Dest_Airport_Name']+'</button></div>').appendTo($("#disambiguateflights"+x))
+            $("<select class='form-control' name=\'disambiguateflight"+x+"\' id=\'disambiguateflight"+x+"\'>").appendTo($("#disambiguateflights"+x))
+            $("#disambiguateflights"+x).toggleClass("col-md-3",true);
+            
+            for (var key in Object.keys(data)) {
+              console.log(data[key]['DepTime'], data[key]['ArrTime'], data[key]['AirlineID'], data[key]['Origin_Airport_ID'], data[key]['Dest_Airport_ID']);
+              $("<option value="+encodeURIComponent(JSON.stringify(data[key]))+">"+data[key]['Origin_Airport_Name']+" &#8594; " +data[key]['Dest_Airport_Name']+"</option>").appendTo($("#disambiguateflight"+x))
+            }
+            $("</select>").appendTo($("#disambiguateflights"+x))
+            
           } else {
             $("<select class=form-control name=\'disambiguateflight"+x+"\' id=\'disambiguateflight"+x+"\'>").appendTo($("#disambiguateflights"+x))
             $("#disambiguateflights"+x).toggleClass("col-md-3",true);
@@ -66,7 +78,6 @@
             $("</select>").appendTo($("#disambiguateflights"+x))
             console.log("More than one flight");
             
-            alert(x);
             $( "#disambiguateflight"+x ).change(function() {
               changehiddendetails(x);
             });
@@ -142,6 +153,7 @@
         <input type="hidden" name="originairportlegnumber" id="originairportlegnumber">
         <input type="hidden" name="destairportlegnumber" id="destairportlegnumber">
         </div>
+
         <div class="col-md-2">
           <div class='input-group date' id='flightdatecontainerlegnumber'>
               <input id="flightdatelegnumber" name="flightdatelegnumber" type='text' class="form-control" />
@@ -186,21 +198,27 @@
         <div class="col-md-2">
           <input id="flightnumberlegnumber" name="flightnumberlegnumber" type='text' class="form-control" />
         </div>    
-        <div class="col-md-3" id="disambiguateflightslegnumber">
-        </div>    
-        <div class="col-md-1">
-        <a href="#" class="remove_field">Remove</a>
+        <div id="disambiguateflightslegnumber">
         </div>
+        <div class="col-md-1">
+        <!-- <a href="#" class="remove_field">Remove</a> -->
+        <!-- <input class="btn btn-default remove_field" type="button" value="Remove"> -->
+        <button class="btn btn-default remove_field">
+            <span class="glyphicon glyphicon-remove" style="vertical-align:top"></span> Remove
+        </button>
+        </div>    
       </div>
       </div>
     </div>
 
 
     <div class = "container">
-
-      <h2>Flight or Plight</h2>
+<p>&nbsp;</p>
+      <h1 style="color: #DDD;font-weight: bold;">Flight or Plight</h1>
       <h3>Ensuring weather, congestion,
  and bad luck won’t ruin your vacation.</h3>
+ 
+        <p>&nbsp;</p>        <p>&nbsp;</p>        <p>&nbsp;</p>   
       <form  action="/output" method="GET">
           <div class="input_fields_wrap">
             <div class="form-group" id="group1">
@@ -215,6 +233,7 @@
                 <input type="hidden" name="originairport1" id="originairport1">
                 <input type="hidden" name="destairport1" id="destairport1">
               </div>
+
               <div class="col-md-2">
                 <label for="flightdate1">Flight Date </label>
                 <div class='input-group date' id='flightdatecontainer1'>
@@ -284,24 +303,24 @@
           </div>
           <div class="row">
             <div class="col-md-1">
+                        &nbsp;
+            </div>
             
+            <div class="col-md-2">
+              <button id="addflight" class="btn btn-default btn-md">Add Another Flight</button>
             </div>
-            <div class="col-md-3">
-              <button id="addflight" class="btn btn-default btn-lg">Add Another Flight</button>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-default btn-md">Will my flight be delayed?</button>
             </div>
-            <div class="col-md-3">
-              <button type="submit" class="btn btn-default btn-lg">Will my flight be delayed?</button>
-            </div>
-            <div class="col-md-5">
-            
-            </div>
+            <div class="col-md-7"></div>
             
           </div>
       </form>
     </div>
 
-    </div> <!-- /.container-->
 
+    </div> <!-- /.container-->
+    <a href="/static/html/slides.html" class="btn btn-default btn-sm" style="position: fixed; top: 5px; right: 5px;">Slides</a>
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
