@@ -12,7 +12,7 @@
     <title>Starter Template for Bootstrap</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
     <link href="/static/css/datepicker3.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css" />
     
@@ -44,12 +44,7 @@
       console.log("Hello there");
       $.getJSON( url, function( data ) {
         if(Object.keys(data)[0]=="Error"){
-          // $("<div class='alert alert-danger' role='alert'">+"hi"+Object.keys(data)[0]+": "+data["Error"]+"</div>").appendTo($("#disambiguateflights"+x))
-          $('<button type="button" class="btn btn-danger">'+Object.keys(data)[0]+": "+data["Error"]+'</button>').appendTo($("#disambiguateflights"+x))
-          
-          // $('<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>'+Object.keys(data)[0]+": "+data["Error"]+"</div>").appendTo($("#disambiguateflights"+x))
-          // $('<div class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>'+Object.keys(data)[0]+": "+data["Error"]+'</div>').appendTo($("#disambiguateflights"+x))
-
+          $('<div id="disambiguateflight'+x+'"><button type="button" class="btn btn-danger">'+Object.keys(data)[0]+": "+data["Error"]+'</button></div>').appendTo($("#disambiguateflights"+x))
           
           $("#group"+x).toggleClass("has-error",true);
           $("#disambiguateflights"+x).toggleClass("col-md-3",true);
@@ -57,7 +52,9 @@
           //If we only returned one element from the JSON, there is only one flight with that flight number on that date
           if(Object.keys(data).length==1){
             console.log("Only One flight");
-            console.log(data);          
+            console.log();  
+                 
+            $('<div id="disambiguateflight'+x+'"><button type="button" class="btn btn-default">'+data[0]['Origin_Airport_Name']+" &#8594; " +data[0]['Dest_Airport_Name']+'</button></div>').appendTo($("#disambiguateflights"+x))
           } else {
             $("<select class=form-control name=\'disambiguateflight"+x+"\' id=\'disambiguateflight"+x+"\'>").appendTo($("#disambiguateflights"+x))
             $("#disambiguateflights"+x).toggleClass("col-md-3",true);
@@ -96,7 +93,7 @@
     $(document).ready(function() {
         var max_fields      = 10; //maximum input boxes allowed
         var wrapper         = $(".input_fields_wrap"); //Fields wrapper
-        var add_button      = $(".add_field_button"); //Add button ID
+        var add_button      = $("#addflight"); //Add button ID
     
         var x = 1; //initlal text box count
         $(add_button).on("click",function(e){ //on add input button click
@@ -189,7 +186,7 @@
         <div class="col-md-2">
           <input id="flightnumberlegnumber" name="flightnumberlegnumber" type='text' class="form-control" />
         </div>    
-        <div id="disambiguateflightslegnumber">
+        <div class="col-md-3" id="disambiguateflightslegnumber">
         </div>    
         <div class="col-md-1">
         <a href="#" class="remove_field">Remove</a>
@@ -202,27 +199,10 @@
     <div class = "container">
 
       <h2>Flight or Plight</h2>
+      <h3>Ensuring weather, congestion,
+ and bad luck won’t ruin your vacation.</h3>
       <form  action="/output" method="GET">
-        <button class="add_field_button">Add Another Flight</button>
-          <div class="row">
-            <div class="col-md-2"> <a href='#' class='remove_field'></a></div>
-          </div>
           <div class="input_fields_wrap">
-            
-            <div class="row">
-              <div class="col-md-3">
-              
-              </div>
-              <div class="col-md-3">
-              Airline
-              </div>
-              <div class="col-md-3">
-              Flight Number
-              </div>
-              <div class="col-md-3">
-              
-              </div>
-            </div>
             <div class="form-group" id="group1">
               <div class="row">
               <div class="col-md-1">
@@ -236,6 +216,7 @@
                 <input type="hidden" name="destairport1" id="destairport1">
               </div>
               <div class="col-md-2">
+                <label for="flightdate1">Flight Date </label>
                 <div class='input-group date' id='flightdatecontainer1'>
                     <input id='flightdate1' name='flightdate1' type='text' class="form-control" />
                     <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
@@ -250,6 +231,7 @@
                 </script>
               </div>
               <div class="col-md-3">
+                <label for="flightairline1">Airline</label>
                 <select id="flightairline1" name="flightairline1" class="form-control">
                     <option value="AA">American Airlines</option>
                     <option value="DL">Delta Air Lines</option>
@@ -284,6 +266,7 @@
                 </select>
               </div>              
               <div class="col-md-2">
+                <label for="flightnumber1">Flight Number</label>
                 <input id="flightnumber1" name="flightnumber1" type='text' class="form-control" />
                                 <span id="inputError2Status" class="sr-only">(error)</span>
                 <script type="text/javascript">
@@ -292,7 +275,9 @@
                   });
                 </script>
               </div>
-              <div id="disambiguateflights1" class="col-md-3"></div>
+              <div id="disambiguateflights1" class="col-md-3">
+                                <label for="adfs">&nbsp;</label>
+              </div>
               <div class="col-md-1"></div>
             </div>
             </div>
@@ -301,10 +286,13 @@
             <div class="col-md-1">
             
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
+              <button id="addflight" class="btn btn-default btn-lg">Add Another Flight</button>
+            </div>
+            <div class="col-md-3">
               <button type="submit" class="btn btn-default btn-lg">Will my flight be delayed?</button>
             </div>
-            <div class="col-md-9">
+            <div class="col-md-5">
             
             </div>
             
