@@ -117,10 +117,16 @@
                 format: 'YYYY/MM/D'
                 });
                 
-                $( "#flightnumber"+x ).change(function() {
+                $( "#flightnumber"+x ).blur(function() {
                   lookupflight(x);
                 });
-                
+                $( "#flightairline"+x ).blur(function() {
+                  lookupflight(x);
+                });
+                $( "#flightdate"+x ).blur(function() {
+                  lookupflight(x);
+                });
+                             
                 $( "#numlegs" ).val(x)
             }
         });
@@ -289,7 +295,13 @@
                 <input id="flightnumber1" name="flightnumber1" type='text' class="form-control" />
                                 <span id="inputError2Status" class="sr-only">(error)</span>
                 <script type="text/javascript">
-                  $( "#flightnumber1" ).change(function() {
+                  $( "#flightnumber1" ).blur(function() {
+                    lookupflight(1);
+                  });
+                  $( "#flightairline1" ).blur(function() {
+                    lookupflight(1);
+                  });
+                  $( "#flightdate1" ).blur(function() {
                     lookupflight(1);
                   });
                 </script>
