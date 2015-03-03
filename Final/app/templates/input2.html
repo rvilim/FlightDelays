@@ -1,0 +1,448 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Flight or Plight</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/datepicker3.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css" />
+    <!-- Google fonts -->
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=PT+Sans+Caption" />
+    
+    <!-- Custom styles for this template -->
+    <!-- <link href="starter-template.css" rel="stylesheet"> -->
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/static/js/moment.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap-datetimepicker.min.js"></script>
+     
+    <script type="text/javascript">
+  
+    function newflight(x){
+      $('#willitbedelayed').prop("disabled",true);
+      return $('#newleg').html().replace(/legnumber/g,x);      
+    }
+    
+    function lookupflight(x){
+      url='/flightinfo?flightairline='+$("#flightairline"+x).val()+"&flightnumber="
+      url=url+$("#flightnumber"+x).val()+"&flightdate="+$("#flightdate"+x).val()
+      
+      console.log(url);
+            
+      if ($("#disambiguateflight"+x).length ) {
+        $("#disambiguateflight"+x).remove();
+      }
+      $("#group"+x).toggleClass("has-error",false);
+      console.log("Hello there");
+      $.getJSON( url, function( data ) {
+        if(Object.keys(data)[0]=="Error"){
+          $('<div id="disambiguateflight'+x+'"><button type="button" class="btn btn-danger">'+Object.keys(data)[0]+": "+data["Error"]+'</button></div>').appendTo($("#disambiguateflights"+x))
+          
+          $("#group"+x).toggleClass("has-error",true);
+          $("#disambiguateflights"+x).toggleClass("col-md-3",true);
+        }else{
+          //If we only returned one element from the JSON, there is only one flight with that flight number on that date
+          if(Object.keys(data).length==1){
+            console.log("Only One flight");
+            console.log();  
+                 
+            // $('<div id="disambiguateflight'+x+'"><button type="button" class="btn btn-default">'+data[0]['Origin_Airport_Name']+" &#8594; " +data[0]['Dest_Airport_Name']+'</button></div>').appendTo($("#disambiguateflights"+x))
+            $("<select class='form-control' name=\'disambiguateflight"+x+"\' id=\'disambiguateflight"+x+"\'>").appendTo($("#disambiguateflights"+x))
+            $("#disambiguateflights"+x).toggleClass("col-md-3",true);
+            
+            for (var key in Object.keys(data)) {
+              console.log(data[key]['DepTime'], data[key]['ArrTime'], data[key]['AirlineID'], data[key]['Origin_Airport_ID'], data[key]['Dest_Airport_ID']);
+              $("<option value="+encodeURIComponent(JSON.stringify(data[key]))+">"+data[key]['Origin_Airport_Name']+" &#8594; " +data[key]['Dest_Airport_Name']+"</option>").appendTo($("#disambiguateflight"+x))
+            }
+            $("</select>").appendTo($("#disambiguateflights"+x))
+            
+          } else {
+            $("<select class=form-control name=\'disambiguateflight"+x+"\' id=\'disambiguateflight"+x+"\'>").appendTo($("#disambiguateflights"+x))
+            $("#disambiguateflights"+x).toggleClass("col-md-3",true);
+            
+            for (var key in Object.keys(data)) {
+              console.log(data[key]['DepTime'], data[key]['ArrTime'], data[key]['AirlineID'], data[key]['Origin_Airport_ID'], data[key]['Dest_Airport_ID']);
+              $("<option value="+encodeURIComponent(JSON.stringify(data[key]))+">"+data[key]['Origin_Airport_Name']+" &#8594; " +data[key]['Dest_Airport_Name']+"</option>").appendTo($("#disambiguateflight"+x))
+            }
+            $("</select>").appendTo($("#disambiguateflights"+x))
+            console.log("More than one flight");
+            
+            $( "#disambiguateflight"+x ).change(function() {
+              changehiddendetails(x);
+            });
+          }
+          $('#willitbedelayed').prop("disabled",false);
+          // Set stuff in our hidden boxes, either the first flight of our dropdown, or the only flight of a unique flight.
+          $('#flightarrtime'+x).val(data['0']['DepTime']);
+          $('#flightdeptime'+x).val(data['0']['ArrTime']);
+          $('#airline'+x).val(data['0']['AirlineID']);
+          $('#originairport'+x).val(data['0']['Origin_Airport_ID']);
+          $('#destairport'+x).val(data['0']['Dest_Airport_ID']);  
+        }
+      });
+    }
+    
+    function changehiddendetails(x){
+      data=JSON.parse(decodeURIComponent($("#disambiguateflight"+x).val()));
+      $('#flightarrtime'+x).val(data['DepTime']);
+      $('#flightdeptime'+x).val(data['ArrTime']);
+      $('#airline'+x).val(data['AirlineID']);
+      $('#originairport'+x).val(data['Origin_Airport_ID']);
+      $('#destairport'+x).val(data['Dest_Airport_ID']);  
+      
+
+      
+    }
+    
+    $(document).ready(function() {
+        var max_fields      = 10; //maximum input boxes allowed
+        var wrapper         = $(".input_fields_wrap"); //Fields wrapper
+        var add_button      = $("#addflight"); //Add button ID
+    
+        var x = 1; //initlal text box count
+        
+        $('#willitbedelayed').prop("disabled",true);
+        
+        $(add_button).on("click",function(e){ //on add input button click
+            e.preventDefault();
+            if(x < max_fields){ //max input box allowed
+                x++; //text box increment
+                $(wrapper).append(newflight(x)); //add input box
+
+                var mindate = new Date();
+                var maxdate = new Date();
+                
+                mindate.setDate(mindate.getDate()+1);
+                maxdate.setDate(mindate.getDate()+8);
+                
+                $('#flightdatecontainer'+x).datetimepicker({
+                format: 'YYYY/MM/D',
+                minDate: mindate,
+                defaultDate: mindate,
+                maxDate: maxdate
+                });
+                
+                $( "#flightnumber"+x ).blur(function() {
+                  lookupflight(x);
+                });
+                $( "#flightairline"+x ).blur(function() {
+                  lookupflight(x);
+                });
+                $( "#flightdate"+x ).blur(function() {
+                  lookupflight(x);
+                });
+                             
+                $( "#numlegs" ).val(x)
+            }
+        });
+    
+        $(wrapper).on("click",".remove_field", function(e){ //user click on remove text
+          $(this).parent('div').parent('div').prev().remove();
+                
+          e.preventDefault(); $(this).parent('div').parent('div').remove(); x--;
+
+          $( "#numlegs" ).val(x);
+          alert('wtf');
+          $('#willitbedelayed').prop("disabled",false);
+
+          for (i = 1; i <= $("#numlegs").val(); i++) {
+            if($("#flightdeptime"+i).val()=="" || $("#flightarrtime1"+i).val()=="" || $("#originairport1"+i).val()=="" || $("#destairport1"+i).val()=="" ){
+              $('#willitbedelayed').prop("disabled",true);
+            }
+          }
+
+        });
+    });
+
+
+        
+
+    </script>
+              
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body onload='$("#newleg").hide();'>
+    <div id="newleg">
+      <div class="form-group" id="grouplegnumber">
+        <div class="row">
+        <div class="col-md-1">
+        <input type="hidden" name="flightdeptimelegnumber" id="flightdeptimelegnumber">
+        <input type="hidden" name="flightarrtimelegnumber" id="flightarrtimelegnumber">
+        <input type="hidden" name="airlinelegnumber" id="airlinelegnumber">
+        <input type="hidden" name="originairportlegnumber" id="originairportlegnumber">
+        <input type="hidden" name="destairportlegnumber" id="destairportlegnumber">
+        </div>
+
+        <div class="col-md-2">
+          <div class='input-group date' id='flightdatecontainerlegnumber'>
+              <input id="flightdatelegnumber" name="flightdatelegnumber" type='text' class="form-control" />
+              <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+              </span>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select id="flightairlinelegnumber" name="flightairlinelegnumber" class="form-control">
+            <option value="AA">American Airlines</option>
+            <option value="DL">Delta Air Lines</option>
+            <option value="G7">GoJet Airlines</option>
+            <option value="B6">JetBlue Airways</option>
+            <option value="WN">Southwest Airlines</option>
+            <option value="UA">United Air Lines</option>
+            <option value="US">US Airways</option>
+            <option value="VX">Virgin America</option>
+            <option value="ZW">Air Wisconsin Airlines</option>
+            <option value="FL">AirTran Airways</option>
+            <option value="AS">Alaska Airlines</option>
+            <option value="G4">Allegiant Air</option>
+            <option value="RP">Chautauqua Airlines</option>
+            <option value="C5">Commutair</option>
+            <option value="CP">Compass Airlines</option>
+            <option value="9E">Endeavor Air</option>
+            <option value="MQ">Envoy Air</option>
+            <option value="EV">ExpressJet Airlines</option>
+            <option value="F9">Frontier Airlines</option>
+            <option value="HA">Hawaiian Airlines</option>
+            <option value="QX">Horizon Air</option>
+            <option value="YV">Mesa Airlines</option>
+            <option value="PDT">Piedmont Airlines</option>
+            <option value="JIA">PSA Airlines</option>
+            <option value="YX">Republic Airlines</option>
+            <option value="S5">Shuttle America</option>
+            <option value="OO">SkyWest Airlines</option>
+            <option value="NK">Spirit Air Lines</option>
+            <option value="SY">Sun Country Airlines</option>
+            <option value="AX">Trans States Airlines</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <input id="flightnumberlegnumber" name="flightnumberlegnumber" type='text' class="form-control" />
+        </div>    
+        <div id="disambiguateflightslegnumber">
+        </div>
+        <div class="col-md-1">
+        <!-- <a href="#" class="remove_field">Remove</a> -->
+        <!-- <input class="btn btn-default remove_field" type="button" value="Remove"> -->
+        <button class="btn btn-default remove_field">
+            <span class="glyphicon glyphicon-remove" style="vertical-align:top"></span> Remove
+        </button>
+        </div>    
+      </div>
+      </div>
+    </div>
+
+
+    <div class = "container">
+<p>&nbsp;</p>
+      <h1 style="color: #DDD;font-weight: bold;">Flight or Plight</h1>
+      <h3>Ensuring weather, congestion,
+ and bad luck won’t ruin your vacation.</h3>
+ 
+        <p>&nbsp;</p>        <p>&nbsp;</p>        <p>&nbsp;</p>   
+      <form id="flightlookup" action="/output" method="GET">
+          <div class="input_fields_wrap">
+            <div class="form-group" id="group1">
+              <div class="row">
+              <div class="col-md-1">
+                <input type="hidden" name="bycode" value="1">
+                <input type="hidden" name="numlegs" id="numlegs" value="1">
+              
+                <input type="hidden" name="flightdeptime1" id="flightdeptime1">
+                <input type="hidden" name="flightarrtime1" id="flightarrtime1">
+                <input type="hidden" name="airline1" id="airline1">
+                <input type="hidden" name="originairport1" id="originairport1">
+                <input type="hidden" name="destairport1" id="destairport1">
+              </div>
+
+              <div class="col-md-2">
+                <label for="flightdate1">Flight Date </label>
+                <div class='input-group date' id='flightdatecontainer1'>
+                    <input id='flightdate1' name='flightdate1' type='text' class="form-control" />
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+                <script type="text/javascript">
+                  $(function () {
+                    var mindate = new Date();
+                    var maxdate = new Date();
+                    
+                    mindate.setDate(mindate.getDate()+1);
+                    maxdate.setDate(mindate.getDate()+8);
+                    
+                    $('#flightdatecontainer1').datetimepicker({
+                    format: 'YYYY/MM/D',
+                    minDate: mindate,
+                    defaultDate: mindate,
+                    maxDate: maxdate
+                    });
+                  });
+                  $( "#flightlookup" ).submit(function( event ) {
+                    // alert( "Handler for .submit() called."+$("#numlegs").val() );
+                    // event.preventDefault();
+
+                    for (i = 1; i <= $("#numlegs").val(); i++) {
+                      if($("#flightdeptime"+i).val()=="" || $("#flightarrtime1"+i).val()=="" || $("#originairport1"+i).val()=="" || $("#destairport1"+i).val()=="" ){
+                        event.preventDefault();
+                        alert("Flight information not completed.")
+                      }
+
+                    }
+                  });
+                </script>
+              </div>
+              <div class="col-md-3">
+                <label for="flightairline1">Airline</label>
+                <select id="flightairline1" name="flightairline1" class="form-control">
+                    <option value="AA">American Airlines</option>
+                    <option value="DL">Delta Air Lines</option>
+                    <option value="G7">GoJet Airlines</option>
+                    <option value="B6">JetBlue Airways</option>
+                    <option value="WN">Southwest Airlines</option>
+                    <option value="UA">United Air Lines</option>
+                    <option value="US">US Airways</option>
+                    <option value="VX">Virgin America</option>
+                    <option value="ZW">Air Wisconsin Airlines</option>
+                    <option value="FL">AirTran Airways</option>
+                    <option value="AS">Alaska Airlines</option>
+                    <option value="G4">Allegiant Air</option>
+                    <option value="RP">Chautauqua Airlines</option>
+                    <option value="C5">Commutair</option>
+                    <option value="CP">Compass Airlines</option>
+                    <option value="9E">Endeavor Air</option>
+                    <option value="MQ">Envoy Air</option>
+                    <option value="EV">ExpressJet Airlines</option>
+                    <option value="F9">Frontier Airlines</option>
+                    <option value="HA">Hawaiian Airlines</option>
+                    <option value="QX">Horizon Air</option>
+                    <option value="YV">Mesa Airlines</option>
+                    <option value="PDT">Piedmont Airlines</option>
+                    <option value="JIA">PSA Airlines</option>
+                    <option value="YX">Republic Airlines</option>
+                    <option value="S5">Shuttle America</option>
+                    <option value="OO">SkyWest Airlines</option>
+                    <option value="NK">Spirit Air Lines</option>
+                    <option value="SY">Sun Country Airlines</option>
+                    <option value="AX">Trans States Airlines</option>
+                </select>
+              </div>              
+              <div class="col-md-2">
+                <label for="flightnumber1">Flight Number</label>
+                <input id="flightnumber1" name="flightnumber1" type='text' class="form-control" />
+                                <span id="inputError2Status" class="sr-only">(error)</span>
+                <script type="text/javascript">
+                  $( "#flightnumber1" ).blur(function() {
+                    lookupflight(1);
+                  });
+                  $( "#flightairline1" ).blur(function() {
+                    lookupflight(1);
+                  });
+                  $( "#flightdate1" ).blur(function() {
+                    lookupflight(1);
+                  });
+
+                  
+                </script>
+              </div>
+              <div id="disambiguateflights1" class="col-md-3">
+                                <label for="adfs">&nbsp;</label>
+              </div>
+              <div class="col-md-1"></div>
+            </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-1">
+                        &nbsp;
+            </div>
+            
+            <div class="col-md-2">
+              <button id="addflight" class="btn btn-default btn-md">Add Another Flight</button>
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-default btn-md" id="willitbedelayed">Will my flight be delayed?</button>
+            </div>
+            <div class="col-md-7"></div>
+            
+          </div>
+          <div class="row">
+            <div class="col-md-1">
+                        &nbsp;
+            </div>
+            
+            <div class="col-md-4">
+                <h2 style="color: #DDD;font-weight: bold;">Suggested Flights</h2>
+            </div>
+            <div class="col-md-7"></div>
+          </div>
+          <div class="form-group">
+            <div class="row">
+              <div class="col-md-1">
+                          &nbsp;
+              </div>
+              
+              <div class="col-md-4">
+                <a href="http://www.flightorplight.com/output?bycode=1&numlegs=2&flightdeptime1=02%2F14%2F2015+07%3A06+PM&flightarrtime1=02%2F14%2F2015+11%3A15+AM&airline1=20355&originairport1=14771&destairport1=11057&flightdate1=2015%2F02%2F14&flightairline1=US&flightnumber1=1783&disambiguateflight1=%257B%2522Dest_Airport_Code%2522%253A%2522CLT%2522%252C%2522Dest_Airport_ID%2522%253A11057%252C%2522Origin_Airport_Name%2522%253A%2522San%2520Francisco%252C%2520CA%2522%252C%2522Origin_Airport_Code%2522%253A%2522SFO%2522%252C%2522DepTime%2522%253A%252202%252F14%252F2015%252011%253A15%2520AM%2522%252C%2522AirlineID%2522%253A20355%252C%2522Origin_Airport_ID%2522%253A14771%252C%2522ArrTime%2522%253A%252202%252F14%252F2015%252007%253A06%2520PM%2522%252C%2522Dest_Airport_Name%2522%253A%2522Charlotte%252C%2520NC%2522%257D&flightdeptime2=02%2F14%2F2015+10%3A05+PM&flightarrtime2=02%2F14%2F2015+08%3A20+PM&airline2=20355&originairport2=11057&destairport2=11618&flightdate2=2015%2F02%2F14&flightairline2=US&flightnumber2=1976&disambiguateflight2=%257B%2522Dest_Airport_Code%2522%253A%2522EWR%2522%252C%2522Dest_Airport_ID%2522%253A11618%252C%2522Origin_Airport_Name%2522%253A%2522Charlotte%252C%2520NC%2522%252C%2522Origin_Airport_Code%2522%253A%2522CLT%2522%252C%2522DepTime%2522%253A%252202%252F14%252F2015%252008%253A20%2520PM%2522%252C%2522AirlineID%2522%253A20355%252C%2522Origin_Airport_ID%2522%253A11057%252C%2522ArrTime%2522%253A%252202%252F14%252F2015%252010%253A05%2520PM%2522%252C%2522Dest_Airport_Name%2522%253A%2522Newark%252C%2520NJ%2522%257D" class="btn btn-default btn-sm" >San Francisco, CA -> Charlotte, NC -> Newark, NJ</a>  
+              </div>
+              <div class="col-md-3">
+                <a href="http://flightorplight.com/output?bycode=1&numlegs=1&flightdeptime1=02%2F12%2F2015+10%3A10+AM&flightarrtime1=02%2F12%2F2015+07%3A45+AM&airline1=20436&originairport1=12264&destairport1=13204&flightdate1=2015%2F02%2F12&flightairline1=F9&flightnumber1=1330&disambiguateflight1=%257B%2522Dest_Airport_Code%2522%253A%2522MCO%2522%252C%2522Dest_Airport_ID%2522%253A13204%252C%2522Origin_Airport_Name%2522%253A%2522Washington%252C%2520DC%2522%252C%2522Origin_Airport_Code%2522%253A%2522IAD%2522%252C%2522DepTime%2522%253A%252202%252F12%252F2015%252007%253A45%2520AM%2522%252C%2522AirlineID%2522%253A20436%252C%2522Origin_Airport_ID%2522%253A12264%252C%2522ArrTime%2522%253A%252202%252F12%252F2015%252010%253A10%2520AM%2522%252C%2522Dest_Airport_Name%2522%253A%2522Orlando%252C%2520FL%2522%257D" class="btn btn-default btn-sm">Washington, DC -> Orlando, FL</a>
+              </div>
+              <div class="col-md-3">
+              </div>
+              <div class="col-md-1">
+                          &nbsp;
+              </div>
+            </div>
+          </div>
+            <div class="form-group">
+              <div class="row">
+
+                <div class="col-md-1">
+                            &nbsp;
+                </div>
+              
+                <div class="col-md-4" style="color: #DDD;font-weight: bold;">
+                  A stopover in Charlotte, NC via US Airways.
+                </div>
+                <div class="col-md-3" style="color: #DDD;font-weight: bold;">
+                  Frontier Airlines Flight 1330 is a chronically delayed flight according to the Bureau of Transportation Statistics.
+                </div>
+                <div class="col-md-3">
+                
+                </div>
+                <div class="col-md-1">
+                
+                </div>
+              </div>
+          </div>
+          
+          
+      </form>
+    </div>
+
+
+    </div> <!-- /.container-->
+    <a href="/static/html/slides.html" class="btn btn-default btn-sm" style="position: fixed; top: 5px; right: 5px;">Slides</a>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+
+  </body>
+</html>
